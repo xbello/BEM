@@ -1,0 +1,1 @@
+HSP = {'subject_end': 1263, 'subject_start': 237, 'query_start': 1, 'query_end': 1027, 'e_val': 0.0, 'length': 1027, 'n_mismatch': 0, 'n_gaps': 0, 'query': 'Mock_DNA_sequence', 'score': 1211.0, 'identity': 100.0, 'subject': 'Drosophila'}
