@@ -19,8 +19,6 @@ def calc_diagonals(checker, checked):
         diagonal_checker = int(checker[5]) - int(checker[10])
         diagonal_checked = int(checked[5]) - int(checked[10])
 
-    print checker, checked
-    print diagonal_checker, diagonal_checked
     return diagonal_checker, diagonal_checked
 
 def calc_penalty(checker, checked, mismatch, gapopen, gapextend):

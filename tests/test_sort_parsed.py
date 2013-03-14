@@ -1,5 +1,12 @@
 import sort_parsed
 
+class testSortParsed():
+    def setUp(self):
+        self.unsorted = "tests/"
+
+    def check_sorting(self):
+        pass
+
 def check_sorting(input_filename, output_filename):
     input_sorted = sort_parsed.sort_file(input_filename)
 
