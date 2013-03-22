@@ -2,7 +2,7 @@ import chao_join
 
 class testChaoJoin():
     def setUp(self):
-        self.file_h = open("tests/test_chao_join_unjoin.txt", "r").readlines()
+        self.file_h = open("test_chao_join_unjoin.txt", "r").readlines()
 
     def test_gap(self):
         assert (chao_join.gap(100, 5, 5) == 505)

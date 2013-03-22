@@ -2,7 +2,7 @@ import sort_parsed
 
 class testSortParsed():
     def setUp(self):
-        self.unsorted = "tests/"
+        pass
 
     def check_sorting(self):
         pass
@@ -20,6 +20,6 @@ def check_sorting(input_filename, output_filename):
 
 def test_sort():
     '''Check the read, sort and correctness of sorting'''
-    check_sorting("tests/test_sort_unsorted.txt",
-                  "tests/test_sort_sorted.txt")
+    check_sorting("test_sort_unsorted.txt",
+                  "test_sort_sorted.txt")
     

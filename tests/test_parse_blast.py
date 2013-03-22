@@ -3,8 +3,8 @@ import parse_blast
 
 class testParseBlast():
     def setUp(self):
-        self.blast_output = "tests/output.blast"
-        self.parsed_output = "tests/test_parse_blast.txt"
+        self.blast_output = "output.blast"
+        self.parsed_output = "test_parse_blast.txt"
         from tests.output_blast import HSP
         self.blast_expected = HSP
 

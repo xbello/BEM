@@ -27,95 +27,103 @@ def test_config_file_paths():
                 config.get("binaries", file_name))),\
             "Path doesn't exist: {0}".format(config.get("binaries", file_name))
 
-def teardown_format():
-    config = test_config_file()
-    for x in ["subject.fas.nhr", "subject.fas.nin", "subject.fas.nsq",
-              "subject.fas.phr", "subject.fas.pin", "subject.fas.psq"]:
-        if os.path.isfile(os.path.join(
-            config.get("paths", "output_db"), "tests", x)):
-            os.unlink(os.path.join(
-                config.get("paths", "output_db"), "tests", x))
+class testFormatDatabase():
+    def setUp(self):
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read('config.cfg')
+        self.fasta = "subject.fas"
+        self.db_path = os.path.join(self.config.get("paths", "output_db"))
+        self.expected = ["subject.fas.nhr", "subject.fas.nin",
+            "subject.fas.nsq"]
 
-@with_setup(teardown_format)
-def test_format_database():
-    config = test_config_file()
-    mock_fasta = "tests/subject.fas"
-    expected_output = ["subject.fas.nhr", "subject.fas.nin", "subject.fas.nsq"]
+    def tearDown(self):
+        for file_name in self.expected:
+            os.unlink(os.path.join(self.db_path, file_name))
+        os.rmdir(self.db_path)
 
-    for db_type in ["nucl", "prot"]:
-        assert utils.format_database(mock_fasta, db_type),\
-            "Couldn't format file {0}".format(mock_fasta)
+    def test_formatn_database(self):
+        assert utils.format_database(self.fasta, "nucl", self.config),\
+            "Couldn't format file {0}".format(self.fasta)
 
-    for file_name in expected_output:
-        assert os.path.isfile(os.path.join(
-            config.get("paths", "output_db"), "tests", file_name)),\
-            "File doesn't exist after format database: {0}".format(
-                os.path.join(config.get("paths", "output_db"),
-                    file_name))
+    def test_checkn_output(self):
+        utils.format_database(self.fasta, "nucl", self.config)
 
-def setup_blastn():
-    utils.format_database("tests/subject.fas", "nucl")
+        expected_output = ["subject.fas.nhr", "subject.fas.nin",
+            "subject.fas.nsq"]
+        for file_name in expected_output:
+            assert os.path.isfile(os.path.join(self.db_path, file_name)),\
+                "File doesn't exist after format database: {0}".format(
+                os.path.join(self.db_path, file_name))
 
-def teardown_blastn():
-    config = test_config_file()
+class testBlastN():
+    def setUp(self):
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read('config.cfg')
+        self.subject = "subject.fas"
+        self.query = "dna_query.fas"
 
-    for x in ["subject.fas.nhr", "subject.fas.nin", "subject.fas.nsq"]:
-        if os.path.isfile(os.path.join(
-            config.get("paths", "output_db"), "tests", x)):
-            os.unlink(os.path.join(
-                config.get("paths", "output_db"), "tests", x))
-    if os.path.isfile(
-        os.path.join(config.get("paths", "output_db"), "output.blast")):
-        os.unlink(os.path.join(
-            config.get("paths", "output_db"), "output.blast"))
+        utils.format_database(self.subject, "nucl", self.config)
 
-@with_setup(setup_blastn, teardown_blastn)
-def test_blastn():
-    '''Test that blasting of a query against a target is working well'''
-    config = test_config_file()
-    query = "tests/dna_query.fas"
-    subject = "tests/subject.fas"
+        if not os.path.isdir("blast_output"): os.mkdir("blast_output")
 
-    assert utils.blastn(query, subject),\
-        "Couldn't blast {0} against {1}".format(query, subject)
+    def tearDown(self):
+        pass
 
-    expected_output = ["output.blast"]
-    for file_name in expected_output:
-        assert os.path.isfile(os.path.join(
-            config.get("paths", "output_db"), file_name)),\
-            "File doesn't exist after blasting: {0}".format(
-                os.path.join(config.get("paths", "output_blast"),
-                    filename))
-        with open(os.path.join(
-            config.get("paths", "output_db"), file_name), "r") as output:
-            assert output.readlines()[0].split() == ['Mock_DNA_sequence', 'Drosophila', '100.00', '1027', '0', '0', '1', '1027', '237', '1263', '0.0', '1211']
+    def test_blastn(self):
+        assert utils.blastn(self.query, self.subject, self.config),\
+            "Couldn't blast {0} against {1}".format(self.query, self.subject)
 
-def setup_multicore():
-    f_p = open("subject.fas", "w")
-    f_p.write("""{0}_1\n{1}{0}_2\n{1}{0}_3\n{1}{0}_4\n{1}""".format(
-        ">Core", "TCCTCGATGGGATCGCCACCTTATCGTGGTGAGGGTGTTTGTGTGTCCCAATGACCTCTAGAGCTATGTCGGCGGGAGTATTTTACTCCTGGCAGGGACACCCATGCCGAACAGGTCGAAAGGTAGGGGCCAGACGAAGAGTGATCCACTGGTCCTCCAGGTTGGGGGTTGGGCAAAGGGTTGATAACCCTCTCCCATAAAAAATAGCTTATCACAGAAACCAGAAGCAGAGCAAATTCACTTGGGAAGACCGTGGCTGCATCTCATGAAAGAGATTGTATGACGCGCAGAGGCCAAAGCCATCCGGACGCCCCTGGGCTGACTAAACCATTGGTCCACCCAAAACATGCAATGAGAATAGGTAATTGGAATGTCAGGACATTATATAGTAGCGGCAATG\n"))
-    f_p.close()
+    def test_blastn_output(self):
+        utils.blastn(self.query, self.subject, self.config)
 
-def teardown_multicore():
-    config = test_config_file()
+        expected = ["subject.fas.nhr", "subject.fas.nin", "subject.fas.nsq"]
 
-    os.unlink("subject.fas")
+        for x in expected:
+            assert os.path.isfile(os.path.join(
+                self.config.get("paths", "output_db"), x)),\
+                "File doesn't exist after blasting: {0}".format(
+                    os.path.join(self.config.get("paths", "output_blast"), x))
 
-    for x in range(4):
-        os.unlink(os.path.join(
-            config.get("paths", "output_db"), str(x), "subject.fas"))
-        os.rmdir(os.path.join(config.get("paths", "output_db"), str(x)))
+    def test_validate_output(self):
+       utils.blastn(self.query, self.subject, self.config)
 
-@with_setup(setup_multicore, teardown_multicore)
-def test_multicore():
-    '''Test if the multicore is splitting correctly the files'''
-    config = test_config_file()
-    subject = "subject.fas"
+       with open(os.path.join(self.config.get(
+           "paths", "output_blast"), self.subject + ".blast"), "r") as output:
+            assert output.readlines()[0].split() == \
+                ["Mock_DNA_sequence", "Drosophila", "99.48", "382", "0", "1",
+                 "1", "382", "67", "446", "2e-128", "445"]
 
-    assert utils.multicore(subject, cores=4),\
-        "Couldn't use multicore function"
-    for core in range(4):
-        assert os.path.isfile(os.path.join(config.get("paths", "output_db"),
-            str(core), subject)),\
-                "File doesn't exist {0}".format(os.path.join(
-                     config.get("paths", "output_db"), str(core), subject))
+class testMulticore():
+    def setUp(self):
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read('config.cfg')
+        self.subject = "subject_multicore.fas"
+
+        utils.multicore(self.subject, self.config, cores=4)
+
+    def tearDown(self):
+        for core in range(4):
+             core_path = os.path.join(
+                 self.config.get("paths", "output_db"), str(core))
+             os.unlink(os.path.join(core_path, self.subject))
+             os.rmdir(core_path)
+
+    def test_multicore_split(self):
+        for core in range(4): 
+            core_path_file = os.path.join(self.config.get(
+                "paths", "output_db"), str(core), self.subject)
+
+            assert os.path.isfile(core_path_file),\
+                "File doesn't exist {0}".format(core_path_file)
+
+    def test_file_content(self):
+        for core in range(4):
+            core_path_file = os.path.join(self.config.get(
+                "paths", "output_db"), str(core), self.subject)
+
+            content = open(core_path_file, "r").readlines()
+            expected = open("multicore_splitted.fas", "r").readlines()
+            expected[0] = expected[0].replace("X", str(core + 1))
+            assert content == expected,\
+                "File content didn't match {0}\n{1}".format(
+                    expected, content)

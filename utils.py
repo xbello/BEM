@@ -29,6 +29,8 @@ def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
         "-gapopen", gapopen,
         "-gapextend", gapextend]
 
+    print " ".join(command)
+
     sub = subprocess.Popen(command)
     sub.communicate()
 
