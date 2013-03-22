@@ -61,19 +61,25 @@ class testBlastN():
         self.config.read('config.cfg')
         self.subject = "subject.fas"
         self.query = "dna_query.fas"
-
+ 
         utils.format_database(self.subject, "nucl", self.config)
 
         if not os.path.isdir("blast_output"): os.mkdir("blast_output")
 
     def tearDown(self):
-        pass
+        db_path = os.path.join(self.config.get("paths", "output_db"))
+        for file_name in ["subject.fas.nhr", "subject.fas.nin",
+            "subject.fas.nsq"]:
+            os.unlink(os.path.join(db_path, file_name))
+
+        os.rmdir(db_path)
 
     def test_blastn(self):
         assert utils.blastn(self.query, self.subject, self.config),\
             "Couldn't blast {0} against {1}".format(self.query, self.subject)
 
     def test_blastn_output(self):
+        #TODO DEBUG This isn't testing anything but formatdb output
         utils.blastn(self.query, self.subject, self.config)
 
         expected = ["subject.fas.nhr", "subject.fas.nin", "subject.fas.nsq"]
