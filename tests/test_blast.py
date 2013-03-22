@@ -1,8 +1,6 @@
 import ConfigParser
 import os
 
-from nose import with_setup
-
 import blast
 import utils
 
