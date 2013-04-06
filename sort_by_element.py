@@ -31,7 +31,6 @@ def sort_file(i_file):
     gets = operator.itemgetter(2, 6, 5, 3, 0)
 
     lines = []
-    return_lines = []
 
     with open(i_file, "rU") as i_file:
         for line in i_file:
