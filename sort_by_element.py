@@ -14,12 +14,12 @@ are overlapped or directly embedded.
 
 The line type is:
 
-1211.0 100.0 Mock_DNA_sequence 1 1027 + Drosophila 237 1263
+1211.0 100.0 query_name 1 1027 + subject_name 237 1263
 
 Where (zero indexed):
 
- [2] is the contig name
- [6] is the element name
+ [2] is the element name
+ [6] is the contig/genome name
  [5] is the direction
  [3] is the insertion point
  [0] is the score
@@ -28,7 +28,7 @@ Where (zero indexed):
 def sort_file(i_file):
     """filename --> list
     """
-    gets = operator.itemgetter(2, 6, 5, 3, 0)
+    gets = operator.itemgetter(6, 2, 5, 3, 0)
 
     lines = []
 
