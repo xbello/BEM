@@ -5,7 +5,7 @@ import os
 import subprocess
 
 def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
-    gapopen="10", gapextend="6"):
+    gapopen="10", gapextend="6", word="11"):
     '''Blastn the query sequence against the subject'''
     binary_path = config.get("binaries", "blast")
     binary = config.get("binaries", "blastn")
@@ -24,6 +24,7 @@ def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
         "-out", os.path.join(output_blast, "{0}.blast".format(subject)),
         "-outfmt", "6",
         "-evalue", evalue,
+        "-word_size", word,
         "-penalty", penalty,
         "-reward", reward,
         "-gapopen", gapopen,
