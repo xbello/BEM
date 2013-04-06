@@ -37,10 +37,9 @@ def sort_file(i_file):
         for line in i_file:
             lines.append(line.strip().split())
 
-    for line in sorted(lines, key=gets):
-        return_lines.append(line)
+    lines.sort(key=gets)
 
-    return return_lines
+    return lines
 
 if __name__ == "__main__":
     try:
