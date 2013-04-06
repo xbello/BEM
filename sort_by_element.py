@@ -26,7 +26,7 @@ Where (zero indexed):
 """
 
 def sort_file(i_file):
-    """filename --> None
+    """filename --> list
     """
     gets = operator.itemgetter(2, 6, 5, 3, 0)
 
