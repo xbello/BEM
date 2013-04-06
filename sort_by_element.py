@@ -31,13 +31,16 @@ def sort_file(i_file):
     gets = operator.itemgetter(2, 6, 5, 3, 0)
 
     lines = []
+    return_lines = []
 
     with open(i_file, "rU") as i_file:
         for line in i_file:
             lines.append(line.strip().split())
 
     for line in sorted(lines, key=gets):
-        print " ".join(line)
+        return_lines.append(line)
+
+    return return_lines
 
 if __name__ == "__main__":
     try:
@@ -54,5 +57,6 @@ if __name__ == "__main__":
 
         sys.exit()
 
-    sort_file(i_file)
+    for line in sort_file(i_file):
+        print " ".join(line)
 
