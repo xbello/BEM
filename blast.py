@@ -10,10 +10,10 @@ config = ConfigParser.RawConfigParser()
 config.read("config.cfg")
 output_path = config.get("paths", "output_db")
 
-def blast(query, subject, evalue, penalty, reward, gapopen, gapextend):
+def blast(query, subject, evalue, word, penalty, reward, gapopen, gapextend):
     #Run the blast
-    p = Process(target=utils.blastn, args=(query, subject, evalue, penalty,
-        reward, gapopen, gapextend,))
+    p = Process(target=utils.blastn, args=(query, subject, evalue, word, 
+        penalty, reward, gapopen, gapextend,))
     p.start()
     p.join()
 
@@ -38,7 +38,8 @@ if __name__ == "__main__":
     parser.add_argument("--dbtype", dest="dbtype", default="nucl")
     parser.add_argument("--evalue", dest="evalue", default="5",
         help="e-value expressed as the power of ten, being 5 = 10^-5")
-    parser.add_argument("--penalty", dest="penalty", type=int, default=5)
+    parser.add_argument("--word", dest="word", default=11)
+    parser.add_argument("--penalty", dest="penalty", type=int, default=-5)
     parser.add_argument("--reward", dest="reward", type=int, default=5)
     parser.add_argument("--gapopen", dest="gapopen", type=int, default=10)
     parser.add_argument("--gapextend", dest="gapextend", type=int, default=10)

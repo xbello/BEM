@@ -3,8 +3,13 @@ and try to rebuild the matches found into full (or at least large) elements.
 
 It's supposed to follow the order:
 1. blast
-2. sort_blast
-3. chao_join
-4. sort_joined
-5. clean_embedeed
-6. cut_overlaps
+2. sort_by_element
+3. clean_embedded
+4. cut overlaps
+5. chao_join
+ # After this, we should have the longest elements but many elements
+ # may cover the same genome spot. From here on, we repeat the previous steps
+ # but without element restriction
+6. sort_joined
+7. clean_embedeed_2
+8. cut_overlaps

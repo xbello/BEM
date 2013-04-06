@@ -1,4 +1,4 @@
-import sort_parsed
+import sort_by_element
 
 class testSortParsed():
     def setUp(self):
@@ -8,10 +8,11 @@ class testSortParsed():
         pass
 
 def check_sorting(input_filename, output_filename):
-    input_sorted = sort_parsed.sort_file(input_filename)
+    input_sorted = sort_by_element.sort_file(input_filename)
 
     output_lines = open(output_filename, "r").readlines()
-    output_values = [x.split() for x in output_lines]
+    #output_values = "".join([x.split() for x in output_lines])
+    output_values = "".join(output_lines)
 
     print input_sorted
     print output_values
