@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import operator
 import sys
 
 
@@ -6,6 +7,24 @@ import sys
 """This script simply takes a sorted output and cut the elements if two
 sequences seems to be ocupying the same spot.
 """
+
+def cut_elements(list_of_lines, return_list = []):
+   """list of lists, list of lists --> (list_of_lists)
+
+   Cut the element of least score by the element of higher score, returning
+   the parts left of the elements.
+   """
+
+   list_of_lines = sort_by_score(list_of_lines)
+
+   if len(list_of_lines) > 1:
+       for element in list_of_lines:
+           # TODO: 
+           # If cutted element is less than 1 bp, pop it, and don't advance
+           # Otherwise, keep cutting and advancing
+           pass
+   else:
+       return list_of_lines
 
 def clean_embedded(list_of_lines, return_list = []):
     """list of lists, list of lists --> (list_of_lists)
@@ -45,22 +64,6 @@ def clean_embedded(list_of_lines, return_list = []):
 
     return return_list
 
-def cut_elements(list_of_lines):
-   """list of lists --> (list_of_lists)
-
-   Cut the element of least score by the element of higher score, returning
-   the parts left of the elements.
-   """
-   if len(list_of_lines) > 1:
-       for element in list_of_lines:
-           # TODO: 
-           # If cutted element is less than 1 bp, pop it, and don't advance
-           # Otherwise, keep cutting and advancing
-           pass
-   else:
-       return list_of_lines
-
-
 def load_input_file(i_file):
     """filename --> (None)
     
@@ -93,6 +96,36 @@ def load_input_file(i_file):
         #And now the last group of the file
         for out_line in clean_embedded(group, return_list = []):
             print " ".join(out_line)
+
+def sort_by_score(list_of_elements):
+    """list -> None
+
+    Takes a list and sort in place it by the score. In the case of tie,
+    sort it by identity %.
+
+    The line type is:
+
+    1211.0 100.0 query_name 1 1027 + subject_name 237 1263
+
+    where (zero indexed):
+    
+     [0] is the score
+     [1] is the similarity
+    """
+
+    gets = operator.itemgetter(0, 1)
+
+    for line in list_of_elements:
+        line[0] = float(line[0])
+        line[1] = float(line[1])
+
+    list_of_elements.sort(key=gets, reverse=True)
+
+    for line in list_of_elements:
+        line[0] = str(line[0])
+        line[1] = str(line[1])
+
+    return True
 
 if __name__ == "__main__":
     try:

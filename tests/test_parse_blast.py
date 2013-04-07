@@ -1,4 +1,3 @@
-from StringIO import StringIO
 import parse_blast
 
 class testParseBlastn():
