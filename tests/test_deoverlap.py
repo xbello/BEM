@@ -15,3 +15,12 @@ class testDeoverlap():
         assert self.unsorted_elements ==\
             self.sorted_elements
 
+    def test_cut_elements(self):
+        """Test if the cut of elements is propperly done
+        """
+
+        print "self.sorted_elements"
+        n = deoverlap.cut_elements(self.sorted_elements)
+        print n
+        assert True
+

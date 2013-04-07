@@ -2,8 +2,6 @@
 import operator
 import sys
 
-
-#TODO: This is still a direct copy of 02_
 """This script simply takes a sorted output and cut the elements if two
 sequences seems to be ocupying the same spot.
 """
@@ -15,14 +13,43 @@ def cut_elements(list_of_lines, return_list = []):
    the parts left of the elements.
    """
 
-   list_of_lines = sort_by_score(list_of_lines)
+   INIT_POINT = 3
+   END_POINT = 4
+
+   sort_by_score(list_of_lines)
+   #TODO: Test this shit
 
    if len(list_of_lines) > 1:
+       ref = list_of_lines.pop(0)
+       return_list.append(ref)
+
        for element in list_of_lines:
-           # TODO: 
-           # If cutted element is less than 1 bp, pop it, and don't advance
-           # Otherwise, keep cutting and advancing
-           pass
+           if int(element[INIT_POINT]) < int(ref[INIT_POINT]) and\
+              int(element[END_POINT]) > int(ref[INIT_POINT]) and\
+              int(element[END_POINT]) < int(ref[END_POINT]):
+               # Element start before reference, overlaps with it, ends before
+               # -> Cut the tail
+               element[END_POINT] = str(int(ref[INIT_POINT]) - 1)
+
+           elif int(element[INIT_POINT]) > int(ref[INIT_POINT]) and\
+                int(element[INIT_POINT]) < int(ref[END_POINT]) and\
+                int(element[END_POINT]) > int(ref[END_POINT]):
+               # Element starts inside reference, and ends after its end.
+               # -> Cut the head
+               element[INIT_POINT] = str(int(ref[END_POINT]) + 1)
+
+           elif int(element[INIT_POINT]) > int(ref[INIT_POINT]) and\
+                int(element[END_POINT]) < int(ref[END_POINT]):
+               # Element is embedded
+               # -> Delete it
+               element[INIT_POINT] = element[END_POINT]
+
+       cut_elements(list_of_lines, return_list)
+           #Cut all elements by first element
+           ##Elements too short (<= 1) should be removed
+           #Pop first element, preserve all others
+           #recursive the function with remaining elements
+           
    else:
        return list_of_lines
 
