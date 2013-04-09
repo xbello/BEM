@@ -32,7 +32,6 @@ def blast_table_consumer(blast_output_file):
                 HSP[integer] = int(data[HSP_keys.index(integer)])
             for strin in ["query", "subject"]:
                 HSP[strin] = data[HSP_keys.index(strin)]
-                 
 
             yield HSP
 
@@ -43,8 +42,8 @@ def write_parsed(HSP_dict):
         "direction", "subject", "subject_start", "subject_end"]
 
     HSP_dict["direction"] = "+"
-    if HSP_dict["query_start"] < HSP_dict["query_end"]:
-        HSP_dict["direction"] == "C"
+    if HSP_dict["query_start"] > HSP_dict["query_end"]:
+        HSP_dict["direction"] = "C"
 
     line = []
     for column in header:

@@ -19,8 +19,6 @@ class testDeoverlap():
         """Test if the cut of elements is propperly done
         """
 
-        print "self.sorted_elements"
-        n = deoverlap.cut_elements(self.sorted_elements)
-        print n
+        deoverlap.cut_elements(self.sorted_elements)
         assert True
 
