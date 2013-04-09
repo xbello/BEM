@@ -3,6 +3,8 @@ import operator
 import os
 import sys
 
+from defs import *
+
 """The objective of this script is to sort a crude output from BLAST to allow
 the reconstruction of the longest elements possible. For that we aim to group
 the elements by chromosome, then for element, then for direction, then for
@@ -28,7 +30,8 @@ Where (zero indexed):
 def sort_file(i_file):
     """filename --> list
     """
-    gets = operator.itemgetter(6, 2, 5, 3, 0)
+    gets = operator.itemgetter(SUBJECT_NAME, QUERY_NAME, DIR, INIT_Q_POINT,
+       SCORE)
 
     lines = []
 
