@@ -2,6 +2,8 @@
 import operator
 import sys
 
+from defs import *
+
 """This script simply takes a sorted output and cut the elements if two
 sequences seems to be ocupying the same spot.
 """
@@ -12,10 +14,6 @@ def adjust_score(element, old_length):
     Adjust the new score of a post-cut element. We are going to assume that 
     every base of the match provides the same amount of score.
     """
-    #TODO: This should be in some definition file and imported
-    INIT_Q_POINT = 3
-    END_Q_POINT = 4
-
     old_score = float(element[0])
     
     score_per_base = 0.0
@@ -36,12 +34,7 @@ def cut_elements(list_of_lines, return_list = []):
     Cut the element of least score by the element of higher score, returning
     the parts left of the elements.
     """
-
-    #TODO: This should be in some definition file and imported
-    INIT_Q_POINT = 3
-    END_Q_POINT = 4
-    INIT_S_POINT = 7
-    END_S_POINT = 8
+    #TODO Should this be in config? Probably YES
     MIN_LENGTH = 2
 
     sort_by_score(list_of_lines)
@@ -107,9 +100,6 @@ def clean_embedded(list_of_lines, return_list = []):
     Deletes all the elements that seems to be embedded or exact match elements,
     returning the rest of the matches
     """
-    #TODO: This should be in some definition file and imported
-    INIT_Q_POINT = 3
-    END_Q_POINT = 4
 
     if len(list_of_lines) > 1:
         # The lines come sorted by insertion point, and are guaranteed to be
@@ -146,10 +136,6 @@ def load_input_file(i_file):
     Loads and processes a sorted input to cut the overlapped elements
     """
     group = []
-    #TODO: This should be in some definition file and imported
-    CROM_NAME = 2
-    EL_DIR = 5
-    EL_NAME = 6
 
     return_list = []
 
@@ -163,9 +149,9 @@ def load_input_file(i_file):
             else:
                 #We got at least one element catched. Now get all elements that
                 # can be related to it
-                if this_line[CROM_NAME] == group[0][CROM_NAME] and\
-                   this_line[EL_DIR] == group[0][EL_DIR] and\
-                   this_line[EL_NAME] == group[0][EL_NAME]:
+                if this_line[SUBJECT_NAME] == group[0][SUBJECT_NAME] and\
+                   this_line[DIR] == group[0][DIR] and\
+                   this_line[QUERY_NAME] == group[0][QUERY_NAME]:
                     group.append(this_line)
                 else:
                    #Now clean the group
@@ -197,17 +183,17 @@ def sort_by_score(list_of_elements):
      [1] is the similarity
     """
 
-    gets = operator.itemgetter(0, 1)
+    gets = operator.itemgetter(SCORE, IDENTITY)
 
     for line in list_of_elements:
-        line[0] = float(line[0])
-        line[1] = float(line[1])
+        line[SCORE] = float(line[SCORE])
+        line[IDENTITY] = float(line[IDENTITY])
 
     list_of_elements.sort(key=gets, reverse=True)
 
     for line in list_of_elements:
-        line[0] = str(line[0])
-        line[1] = str(line[1])
+        line[SCORE] = str(line[SCORE])
+        line[IDENTITY] = str(line[IDENTITY])
 
     return True
 
