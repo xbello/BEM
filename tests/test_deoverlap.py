@@ -16,9 +16,10 @@ class testDeoverlap():
             self.sorted_elements
 
     def test_cut_elements(self):
-        """Test if the cut of elements is propperly done
+        """Test if the cut of elements is properly done
         """
-
-        deoverlap.cut_elements(self.sorted_elements)
+        
+        for el in deoverlap.cut_elements(self.sorted_elements):
+            print " ".join(el)
         assert True
 

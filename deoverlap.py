@@ -6,52 +6,92 @@ import sys
 sequences seems to be ocupying the same spot.
 """
 
+def adjust_score(element, old_length):
+    """list, int -> (list)
+
+    Adjust the new score of a post-cut element. We are going to assume that 
+    every base of the match provides the same amount of score.
+    """
+    INIT_Q_POINT = 3
+    END_Q_POINT = 4
+
+    old_score = float(element[0])
+    
+    score_per_base = 0.0
+    if old_score > 0:
+        score_per_base = old_score / old_length
+
+    new_length = abs(int(element[END_Q_POINT]) - \
+                 int(element[INIT_Q_POINT]))
+
+    element[0] = "{0:.1f}".format(new_length * score_per_base)
+
+    return element
+   
+
 def cut_elements(list_of_lines, return_list = []):
-   """list of lists, list of lists --> (list_of_lists)
+    """list of lists, list of lists --> (list_of_lists)
 
-   Cut the element of least score by the element of higher score, returning
-   the parts left of the elements.
-   """
+    Cut the element of least score by the element of higher score, returning
+    the parts left of the elements.
+    """
 
-   INIT_POINT = 3
-   END_POINT = 4
+    INIT_Q_POINT = 3
+    END_Q_POINT = 4
+    INIT_S_POINT = 7
+    END_S_POINT = 8
+    MIN_LENGTH = 2
 
-   sort_by_score(list_of_lines)
-   #TODO: Test this shit
+    sort_by_score(list_of_lines)
+ 
+    if len(list_of_lines) > 1:
+        ref = list_of_lines.pop(0)
+ 
+        if abs(int(ref[INIT_Q_POINT]) - int(ref[END_Q_POINT])) < MIN_LENGTH:
+            #Sequence is too short to be saved. Don't save and rerun
+            cut_elements(list_of_lines, return_list)
+        else:
+            return_list.append(ref)
+ 
+        for element in list_of_lines:
+            # First we save the element original length to readjust the score
+            # further on
+            element_length = abs(int(element[END_Q_POINT]) - \
+                int(element[INIT_Q_POINT]))
 
-   if len(list_of_lines) > 1:
-       ref = list_of_lines.pop(0)
-       return_list.append(ref)
-
-       for element in list_of_lines:
-           if int(element[INIT_POINT]) < int(ref[INIT_POINT]) and\
-              int(element[END_POINT]) > int(ref[INIT_POINT]) and\
-              int(element[END_POINT]) < int(ref[END_POINT]):
-               # Element start before reference, overlaps with it, ends before
-               # -> Cut the tail
-               element[END_POINT] = str(int(ref[INIT_POINT]) - 1)
-
-           elif int(element[INIT_POINT]) > int(ref[INIT_POINT]) and\
-                int(element[INIT_POINT]) < int(ref[END_POINT]) and\
-                int(element[END_POINT]) > int(ref[END_POINT]):
-               # Element starts inside reference, and ends after its end.
-               # -> Cut the head
-               element[INIT_POINT] = str(int(ref[END_POINT]) + 1)
-
-           elif int(element[INIT_POINT]) > int(ref[INIT_POINT]) and\
-                int(element[END_POINT]) < int(ref[END_POINT]):
-               # Element is embedded
-               # -> Delete it
-               element[INIT_POINT] = element[END_POINT]
-
-       cut_elements(list_of_lines, return_list)
+            if int(element[INIT_Q_POINT]) < int(ref[INIT_Q_POINT]) and\
+               int(element[END_Q_POINT]) > int(ref[INIT_Q_POINT]) and\
+               int(element[END_Q_POINT]) < int(ref[END_Q_POINT]):
+                # Element start before reference, overlaps with it, ends before
+                # -> Cut the tail
+                element[END_Q_POINT] = str(int(ref[INIT_Q_POINT]) - 1)
+                element[END_S_POINT] = str(int(ref[INIT_S_POINT]) - 1)
+                
+ 
+            elif int(element[INIT_Q_POINT]) > int(ref[INIT_Q_POINT]) and\
+                 int(element[INIT_Q_POINT]) < int(ref[END_Q_POINT]) and\
+                 int(element[END_Q_POINT]) > int(ref[END_Q_POINT]):
+                # Element starts inside reference, and ends after its end.
+                # -> Cut the head
+                element[INIT_Q_POINT] = str(int(ref[END_Q_POINT]) + 1)
+                element[INIT_S_POINT] = str(int(ref[END_S_POINT]) + 1)
+ 
+            elif int(element[INIT_Q_POINT]) > int(ref[INIT_Q_POINT]) and\
+                 int(element[END_Q_POINT]) < int(ref[END_Q_POINT]):
+                # Element is embedded
+                # -> Delete it
+                element[INIT_Q_POINT] = element[END_Q_POINT]
+                element[INIT_S_POINT] = element[END_S_POINT]
+ 
+            element = adjust_score(element, element_length)
+ 
+        cut_elements(list_of_lines, return_list)
            #Cut all elements by first element
            ##Elements too short (<= 1) should be removed
            #Pop first element, preserve all others
            #recursive the function with remaining elements
            
-   else:
-       return list_of_lines
+    return return_list
 
 def clean_embedded(list_of_lines, return_list = []):
     """list of lists, list of lists --> (list_of_lists)
@@ -59,19 +99,19 @@ def clean_embedded(list_of_lines, return_list = []):
     Deletes all the elements that seems to be embedded or exact match elements,
     returning the rest of the matches
     """
-    INIT_POINT = 3
-    END_POINT = 4
+    INIT_Q_POINT = 3
+    END_Q_POINT = 4
 
     if len(list_of_lines) > 1:
         # The lines come sorted by insertion point, and are guaranteed to be
         # the same element, the same contig and the same direction
 
-        if int(list_of_lines[1][END_POINT]) <=\
-            int(list_of_lines[0][END_POINT]):
+        if int(list_of_lines[1][END_Q_POINT]) <=\
+            int(list_of_lines[0][END_Q_POINT]):
             #The after reference line is embedded in the reference, delete it
             list_of_lines.pop(1)
-        elif int(list_of_lines[0][INIT_POINT]) ==\
-            int(list_of_lines[1][INIT_POINT]):
+        elif int(list_of_lines[0][INIT_Q_POINT]) ==\
+            int(list_of_lines[1][INIT_Q_POINT]):
             # The reference is embedded in the next element, delete it.
             #
             # (First equal in both, but last higher in second element implied
