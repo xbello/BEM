@@ -73,12 +73,15 @@ def write_parsed(HSP_dict):
         "direction", "subject", "subject_start", "subject_end"]
 
     HSP_dict["direction"] = "+"
-    if HSP_dict["query_start"] > HSP_dict["query_end"]:
-        HSP_dict["direction"] = "C"
-        #Swap the start and ending points
-        HSP_hold = HSP_dict["query_start"]
-        HSP_dict["query_start"] = HSP_dict["query_end"]
-        HSP_dict["query_end"] = HSP_hold
+    for target in ["subject", "query"]:
+        if HSP_dict["{0}_start".format(target)] >\
+           HSP_dict["{0}_end".format(target)]:
+            HSP_dict["direction"] = "C"
+            #Swap the start and ending points
+            HSP_hold = HSP_dict["{0}_start".format(target)]
+            HSP_dict["{0}_start".format(target)] =\
+                HSP_dict["{0}_end".format(target)]
+            HSP_dict["{0}_end".format(target)] = HSP_hold
 
     line = []
     for column in header:

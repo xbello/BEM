@@ -12,6 +12,7 @@ def adjust_score(element, old_length):
     Adjust the new score of a post-cut element. We are going to assume that 
     every base of the match provides the same amount of score.
     """
+    #TODO: This should be in some definition file and imported
     INIT_Q_POINT = 3
     END_Q_POINT = 4
 
@@ -36,6 +37,7 @@ def cut_elements(list_of_lines, return_list = []):
     the parts left of the elements.
     """
 
+    #TODO: This should be in some definition file and imported
     INIT_Q_POINT = 3
     END_Q_POINT = 4
     INIT_S_POINT = 7
@@ -43,6 +45,10 @@ def cut_elements(list_of_lines, return_list = []):
     MIN_LENGTH = 2
 
     sort_by_score(list_of_lines)
+
+    if len(list_of_lines) == 1 and not return_list:
+        #If we got only one match, don't lose time
+        return list_of_lines
  
     if len(list_of_lines) > 1:
         ref = list_of_lines.pop(0)
@@ -54,6 +60,8 @@ def cut_elements(list_of_lines, return_list = []):
             return_list.append(ref)
  
         for element in list_of_lines:
+            # TODO: This loop should be in its own function
+            # XXX
             # First we save the element original length to readjust the score
             # further on
             element_length = abs(int(element[END_Q_POINT]) - \
@@ -99,6 +107,7 @@ def clean_embedded(list_of_lines, return_list = []):
     Deletes all the elements that seems to be embedded or exact match elements,
     returning the rest of the matches
     """
+    #TODO: This should be in some definition file and imported
     INIT_Q_POINT = 3
     END_Q_POINT = 4
 
@@ -132,14 +141,17 @@ def clean_embedded(list_of_lines, return_list = []):
     return return_list
 
 def load_input_file(i_file):
-    """filename --> (None)
+    """filename --> (list)
     
     Loads and processes a sorted input to cut the overlapped elements
     """
     group = []
+    #TODO: This should be in some definition file and imported
     CROM_NAME = 2
     EL_DIR = 5
     EL_NAME = 6
+
+    return_list = []
 
     with open(i_file, "rU") as i_file:
         for line in i_file:
@@ -157,12 +169,17 @@ def load_input_file(i_file):
                     group.append(this_line)
                 else:
                    #Now clean the group
-                   for out_line in clean_embedded(group, return_list = []):
-                       print " ".join(out_line)
+                   non_embedded = clean_embedded(group, return_list = [])
+                   for out_line in cut_elements(non_embedded):
+                       return_list.append(out_line)
+
                    group = [this_line] #And initialize it again
         #And now the last group of the file
-        for out_line in clean_embedded(group, return_list = []):
-            print " ".join(out_line)
+        non_embedded = clean_embedded(group, return_list = [])
+        for out_line in cut_elements(non_embedded):
+            return_list.append(out_line)
+
+    return return_list
 
 def sort_by_score(list_of_elements):
     """list -> None
@@ -209,5 +226,7 @@ if __name__ == "__main__":
 
         sys.exit()
 
-    load_input_file(i_file)
+    non_embedded = load_input_file(i_file)
+    for x in non_embedded:
+        print " ".join(x)
 
