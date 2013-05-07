@@ -11,6 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+.. automodule:: BEM
+   :members:
+
 Indices and tables
 ==================
 
