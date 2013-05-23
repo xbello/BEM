@@ -168,7 +168,7 @@ def load_input_file(i_file):
     return return_list
 
 def sort_by_score(list_of_elements):
-    """list -> None
+    """list of lists -> None
 
     Takes a list and sort in place it by the score. In the case of tie,
     sort it by identity %.

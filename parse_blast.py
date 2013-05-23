@@ -1,4 +1,14 @@
 
+WUBLAST_HSP_KEYS = ["query", "subject", "e_val", "n_scores",
+    "score_norm", "score", "length", "idents", "matchs", "n_mismatch",
+    "identity", "pc_pos", "n_gaps", "gap_len", "subject_gaps",
+    "subject_gap_len", "query_frame", "query_start", "query_end",
+    "subject_frame", "subject_start", "subject_end"]
+
+BLAST_HSP_KEYS = ["query", "subject", "identity", "length", "n_mismatch",
+    "n_gaps", "query_start", "query_end", "subject_start", "subject_end",
+    "e_val", "score"]
+
 def select_blaster_keys(splitted_line):
     """list -> (dict)
     
@@ -13,16 +23,6 @@ def select_blaster_keys(splitted_line):
 
      12 columns divided by \t
     """
-
-    WUBLAST_HSP_KEYS = HSP_keys = ["query", "subject", "e_val", "n_scores",
-        "score_norm", "score", "length", "idents", "matchs", "n_mismatch",
-        "identity", "pc_pos", "n_gaps", "gap_len", "subject_gaps",
-        "subject_gap_len", "query_frame", "query_start", "query_end",
-        "subject_frame", "subject_start", "subject_end"]
-
-    BLAST_HSP_KEYS = ["query", "subject", "identity", "length", "n_mismatch",
-        "n_gaps", "query_start", "query_end", "subject_start", "subject_end",
-        "e_val", "score"]
 
     if len(splitted_line) == 22:
         return WUBLAST_HSP_KEYS
