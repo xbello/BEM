@@ -5,3 +5,15 @@ class Match(object):
         self.subject = (0, 0)
         self.chromosome = ""
         self.orientation = "+" #Or "C"
+
+    def __eq__(self, other):
+        return self.query[0] == other.query[0]
+
+    def __gt__(self, other):
+        return self.query[0] > other.query[0]
+
+    def __lt__(self, other):
+        return self.query[0] < other.query[0]
+    
+    #TODO:
+    # Implement __add__ to join two matches?
