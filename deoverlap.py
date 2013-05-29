@@ -37,40 +37,57 @@ def cut_elements_by_group(elements, top_element):
     return_list = []
 
     for element in elements:
-        # First we save the element original length to readjust the score
-        # further on
-        element_length = abs(int(element[END_Q_POINT]) - \
-            int(element[INIT_Q_POINT]))
+        cut_element = cut_element_by_other(top_element, element)
 
-        if int(element[INIT_Q_POINT]) < int(top_element[INIT_Q_POINT]) and\
-           int(element[END_Q_POINT]) > int(top_element[INIT_Q_POINT]) and\
-           int(element[END_Q_POINT]) < int(top_element[END_Q_POINT]):
-            # Element start before reference, overlaps with it, ends before
-            # -> Cut the tail
-            element[END_Q_POINT] = str(int(top_element[INIT_Q_POINT]) - 1)
-            element[END_S_POINT] = str(int(top_element[INIT_S_POINT]) - 1)
-            
-
-        elif int(element[INIT_Q_POINT]) > int(top_element[INIT_Q_POINT]) and\
-             int(element[INIT_Q_POINT]) < int(top_element[END_Q_POINT]) and\
-             int(element[END_Q_POINT]) > int(top_element[END_Q_POINT]):
-            # Element starts inside reference, and ends after its end.
-            # -> Cut the head
-            element[INIT_Q_POINT] = str(int(top_element[END_Q_POINT]) + 1)
-            element[INIT_S_POINT] = str(int(top_element[END_S_POINT]) + 1)
-
-        elif int(element[INIT_Q_POINT]) > int(top_element[INIT_Q_POINT]) and\
-             int(element[END_Q_POINT]) < int(top_element[END_Q_POINT]):
-            # Element is embedded
-            # -> Delete it
-            element[INIT_Q_POINT] = element[END_Q_POINT]
-            element[INIT_S_POINT] = element[END_S_POINT]
-
-        element = adjust_score(element, element_length)
-
-        return_list.append(element)
+        return_list.append(cut_element)
 
     return return_list 
+
+def cut_element_by_other(cutter, to_cut):
+    """list, list --> (list)
+    
+    Cut the "to_cut" element by the "cutter" element, returning the left of
+    "to_cut" element
+    """
+
+    # Transform the points into ints
+    to_cut = str_to_int(to_cut)
+    cutter = str_to_int(cutter)
+
+    # First we save the element original length to readjust the score
+    # further on
+    element_length = abs(to_cut[END_Q_POINT] - to_cut[INIT_Q_POINT])
+
+    if int(to_cut[INIT_Q_POINT]) < int(cutter[INIT_Q_POINT]) and\
+       int(to_cut[END_Q_POINT]) > int(cutter[INIT_Q_POINT]) and\
+       int(to_cut[END_Q_POINT]) < int(cutter[END_Q_POINT]):
+        # Element start before reference, overlaps with it, ends before
+        # -> Cut the tail
+        lost_span = abs(int(cutter[INIT_Q_POINT]) - \
+                        int(to_cut[END_Q_POINT])) + 1
+        to_cut[END_Q_POINT] = str(int(cutter[INIT_Q_POINT]) - 1)
+
+    elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
+         to_cut[INIT_Q_POINT] < cutter[END_Q_POINT] and\
+         to_cut[END_Q_POINT] > cutter[END_Q_POINT]:
+        # Element starts inside reference, and ends after its end.
+        # -> Cut the head
+        lost_span = abs(cutter[END_Q_POINT] - to_cut[INIT_Q_POINT]) + 1
+        to_cut[INIT_Q_POINT] = cutter[END_Q_POINT] + 1
+        to_cut[INIT_S_POINT] = to_cut[INIT_S_POINT] + lost_span
+
+    elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
+         to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
+        # Element is embedded
+        # -> Delete it
+        to_cut[INIT_Q_POINT] = cutter[END_Q_POINT]
+        to_cut[INIT_S_POINT] = cutter[END_S_POINT]
+
+    to_cut = int_to_str(to_cut)
+    cutter = int_to_str(cutter)
+    to_cut = adjust_score(to_cut, element_length)
+
+    return to_cut
 
 def cut_elements(list_of_lines, return_list = []):
     """list of lists, list of lists --> (list_of_lists)
@@ -206,6 +223,26 @@ def sort_by_score(list_of_elements):
         line[IDENTITY] = str(line[IDENTITY])
 
     return True
+
+def int_to_str(element):
+    """Transform the int points of an element (INIT and END points of
+    both query and subject) into strings.
+    """
+
+    for p in [INIT_Q_POINT, END_Q_POINT, INIT_S_POINT, END_S_POINT]:
+        element[p] = str(element[p])
+
+    return element
+
+def str_to_int(element):
+    """Transform the int-erable points of an element (INIT and END points of
+    both query and subject) into int.
+    """
+
+    for p in [INIT_Q_POINT, END_Q_POINT, INIT_S_POINT, END_S_POINT]:
+        element[p] = int(element[p])
+
+    return element
 
 if __name__ == "__main__":
     try:
