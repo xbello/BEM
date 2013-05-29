@@ -58,13 +58,12 @@ def cut_element_by_other(cutter, to_cut):
     # further on
     element_length = abs(to_cut[END_Q_POINT] - to_cut[INIT_Q_POINT])
 
-    if int(to_cut[INIT_Q_POINT]) < int(cutter[INIT_Q_POINT]) and\
-       int(to_cut[END_Q_POINT]) > int(cutter[INIT_Q_POINT]) and\
-       int(to_cut[END_Q_POINT]) < int(cutter[END_Q_POINT]):
+    if to_cut[INIT_Q_POINT] < cutter[INIT_Q_POINT] and\
+       to_cut[END_Q_POINT] > cutter[INIT_Q_POINT] and\
+       to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
         # Element start before reference, overlaps with it, ends before
         # -> Cut the tail
-        lost_span = abs(int(cutter[INIT_Q_POINT]) - \
-                        int(to_cut[END_Q_POINT])) + 1
+        lost_span = abs(cutter[INIT_Q_POINT] - to_cut[END_Q_POINT]) + 1
         to_cut[END_Q_POINT] = str(int(cutter[INIT_Q_POINT]) - 1)
 
     elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
