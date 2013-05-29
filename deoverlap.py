@@ -28,6 +28,50 @@ def adjust_score(element, old_length):
     return element
    
 
+def cut_elements_by_group(elements, top_element):
+    """list of lists, list -> (list of lists)
+
+    Takes a best (or top) element and cut all the other in the list by
+    it. Returns the remaining of the elements"""
+
+    return_list = []
+
+    for element in elements:
+        # First we save the element original length to readjust the score
+        # further on
+        element_length = abs(int(element[END_Q_POINT]) - \
+            int(element[INIT_Q_POINT]))
+
+        if int(element[INIT_Q_POINT]) < int(top_element[INIT_Q_POINT]) and\
+           int(element[END_Q_POINT]) > int(top_element[INIT_Q_POINT]) and\
+           int(element[END_Q_POINT]) < int(top_element[END_Q_POINT]):
+            # Element start before reference, overlaps with it, ends before
+            # -> Cut the tail
+            element[END_Q_POINT] = str(int(top_element[INIT_Q_POINT]) - 1)
+            element[END_S_POINT] = str(int(top_element[INIT_S_POINT]) - 1)
+            
+
+        elif int(element[INIT_Q_POINT]) > int(top_element[INIT_Q_POINT]) and\
+             int(element[INIT_Q_POINT]) < int(top_element[END_Q_POINT]) and\
+             int(element[END_Q_POINT]) > int(top_element[END_Q_POINT]):
+            # Element starts inside reference, and ends after its end.
+            # -> Cut the head
+            element[INIT_Q_POINT] = str(int(top_element[END_Q_POINT]) + 1)
+            element[INIT_S_POINT] = str(int(top_element[END_S_POINT]) + 1)
+
+        elif int(element[INIT_Q_POINT]) > int(top_element[INIT_Q_POINT]) and\
+             int(element[END_Q_POINT]) < int(top_element[END_Q_POINT]):
+            # Element is embedded
+            # -> Delete it
+            element[INIT_Q_POINT] = element[END_Q_POINT]
+            element[INIT_S_POINT] = element[END_S_POINT]
+
+        element = adjust_score(element, element_length)
+
+        return_list.append(element)
+
+    return return_list 
+
 def cut_elements(list_of_lines, return_list = []):
     """list of lists, list of lists --> (list_of_lists)
 
@@ -48,49 +92,13 @@ def cut_elements(list_of_lines, return_list = []):
  
         if abs(int(ref[INIT_Q_POINT]) - int(ref[END_Q_POINT])) < MIN_LENGTH:
             #Sequence is too short to be saved. Don't save and rerun
-            cut_elements(list_of_lines, return_list)
+            cut_elements(list_of_lines, return_list = return_list)
         else:
             return_list.append(ref)
- 
-        for element in list_of_lines:
-            # TODO: This loop should be in its own function
-            # XXX
-            # First we save the element original length to readjust the score
-            # further on
-            element_length = abs(int(element[END_Q_POINT]) - \
-                int(element[INIT_Q_POINT]))
 
-            if int(element[INIT_Q_POINT]) < int(ref[INIT_Q_POINT]) and\
-               int(element[END_Q_POINT]) > int(ref[INIT_Q_POINT]) and\
-               int(element[END_Q_POINT]) < int(ref[END_Q_POINT]):
-                # Element start before reference, overlaps with it, ends before
-                # -> Cut the tail
-                element[END_Q_POINT] = str(int(ref[INIT_Q_POINT]) - 1)
-                element[END_S_POINT] = str(int(ref[INIT_S_POINT]) - 1)
-                
- 
-            elif int(element[INIT_Q_POINT]) > int(ref[INIT_Q_POINT]) and\
-                 int(element[INIT_Q_POINT]) < int(ref[END_Q_POINT]) and\
-                 int(element[END_Q_POINT]) > int(ref[END_Q_POINT]):
-                # Element starts inside reference, and ends after its end.
-                # -> Cut the head
-                element[INIT_Q_POINT] = str(int(ref[END_Q_POINT]) + 1)
-                element[INIT_S_POINT] = str(int(ref[END_S_POINT]) + 1)
- 
-            elif int(element[INIT_Q_POINT]) > int(ref[INIT_Q_POINT]) and\
-                 int(element[END_Q_POINT]) < int(ref[END_Q_POINT]):
-                # Element is embedded
-                # -> Delete it
-                element[INIT_Q_POINT] = element[END_Q_POINT]
-                element[INIT_S_POINT] = element[END_S_POINT]
- 
-            element = adjust_score(element, element_length)
- 
-        cut_elements(list_of_lines, return_list)
-           #Cut all elements by first element
-           ##Elements too short (<= 1) should be removed
-           #Pop first element, preserve all others
-           #recursive the function with remaining elements
+        list_of_lines = cut_elements_by_group(list_of_lines, ref)
+  
+        cut_elements(list_of_lines, return_list = return_list)
            
     return return_list
 
@@ -136,8 +144,8 @@ def load_input_file(i_file):
     Loads and processes a sorted input to cut the overlapped elements
     """
     group = []
-
-    return_list = []
+ 
+    ret_list = []
 
     with open(i_file, "rU") as i_file:
         for line in i_file:
@@ -154,18 +162,20 @@ def load_input_file(i_file):
                    this_line[QUERY_NAME] == group[0][QUERY_NAME]:
                     group.append(this_line)
                 else:
-                   #Now clean the group
+                   # A different element has been found.
+                   # Now clean the group
                    non_embedded = clean_embedded(group, return_list = [])
                    for out_line in cut_elements(non_embedded):
-                       return_list.append(out_line)
+                       ret_list.append(out_line)
 
                    group = [this_line] #And initialize it again
-        #And now the last group of the file
-        non_embedded = clean_embedded(group, return_list = [])
-        for out_line in cut_elements(non_embedded):
-            return_list.append(out_line)
+    #And now the last group of the file
+    non_embedded = clean_embedded(group, return_list = [])
+    cutted_elements = cut_elements(non_embedded, return_list = [])
+    for out_line in cutted_elements:
+        ret_list.append(out_line)
 
-    return return_list
+    return ret_list
 
 def sort_by_score(list_of_elements):
     """list of lists -> None

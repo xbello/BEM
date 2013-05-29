@@ -12,6 +12,11 @@ class testDeoverlap():
             "710", "+", "4e", "138", "107"]]
         self.single_element = [["38.8", "81.25", "PegasusA", "210", "710",
             "+", "4e", "138", "107"]]
+        self.unsorted_and_cut_elements = [['38.8', '81.25', 'PegasusA', '210',
+            '710', '+', '4e', '138', '107'], ['34.8', '81.25', 'PegasusA',
+            '2107', '2139', '+', '4e', '138', '107'], ['34.3', '88.89',
+            'PegasusA', '1613', '1639', '+', '4e', '71', '45'], ['29.7',
+             '69.49', 'PegasusA', '711', '757', '+', '4e', '108', '956']]
 
     def test_sort_by_score(self):
         """Check if the sorting is doing the sort by score
@@ -42,9 +47,9 @@ class testDeoverlap():
     def test_load_input_file(self):
         """Test the correct loading and processing of an output file
         """
-        print deoverlap.load_input_file("test_deoverlap.txt")
-        print self.unsorted_elements
-        assert True
-        assert deoverlap.load_input_file("test_deoverlap.txt") ==\
-            self.unsorted_elements
+        #load_input_file does a cut_element that removes elements under a
+        # MIN_LENGTH, so self.unsorted_elements may have more elements.
+        deoverlapped = deoverlap.load_input_file("test_deoverlap.txt")
+        print deoverlapped
+        assert deoverlapped == self.unsorted_and_cut_elements
 
