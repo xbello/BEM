@@ -39,7 +39,8 @@ def cut_elements_by_group(elements, top_element):
     for element in elements:
         cut_element = cut_element_by_other(top_element, element)
 
-        return_list.append(cut_element)
+        if cut_element:
+            return_list.append(cut_element)
 
     return return_list 
 
@@ -64,7 +65,8 @@ def cut_element_by_other(cutter, to_cut):
         # Element start before reference, overlaps with it, ends before
         # -> Cut the tail
         lost_span = abs(cutter[INIT_Q_POINT] - to_cut[END_Q_POINT]) + 1
-        to_cut[END_Q_POINT] = str(int(cutter[INIT_Q_POINT]) - 1)
+        to_cut[END_Q_POINT] = cutter[INIT_Q_POINT] - 1
+        to_cut[END_S_POINT] = to_cut[END_S_POINT] - lost_span
 
     elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
          to_cut[INIT_Q_POINT] < cutter[END_Q_POINT] and\
@@ -79,8 +81,7 @@ def cut_element_by_other(cutter, to_cut):
          to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
         # Element is embedded
         # -> Delete it
-        to_cut[INIT_Q_POINT] = cutter[END_Q_POINT]
-        to_cut[INIT_S_POINT] = cutter[END_S_POINT]
+        return []
 
     to_cut = int_to_str(to_cut)
     cutter = int_to_str(cutter)

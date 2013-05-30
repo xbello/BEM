@@ -44,14 +44,6 @@ class testDeoverlap():
         assert ["38.8", "81.25", "PegasusA", 210, 710, "+", "4e", 138, 638] == \
             deoverlap.str_to_int(self.single_element[0])
 
-    def test_cut_elements(self):#TODO
-        """Test if the cut of elements is properly done
-        """
-        
-        #for el in deoverlap.cut_elements(self.sorted_elements):
-        #    print " ".join(el)
-        assert True
-
     def test_cut_element_by_other_head(self):
         """Test the cut of element if the head is overlapping"""
         overlapped_head = ['37.4', '69.49', 'PegasusA', '699', '757', '+', '4e', '898', '956']
@@ -60,22 +52,20 @@ class testDeoverlap():
             self.single_element[0], overlapped_head) == \
                 ['29.7', '69.49', 'PegasusA', '711', '757', '+', '4e', '910', '956']
 
-    def test_cut_element_by_other_tail(self):#TODO
-        """Test the cut of element if the head is overlapping"""
-        overlapped_head = ['37.4', '69.49', 'PegasusA', '699', '757', '+', '4e', '898', '956']
+    def test_cut_element_by_other_tail(self):
+        """Test the cut of element if the tail is overlapping"""
+        overlapped_tail = ['37.4', '69.49', 'PegasusA', '1', '500', '+', '4e', '400', '900']
       
         assert deoverlap.cut_element_by_other(
-            self.single_element[0], overlapped_head) == \
-                ['29.7', '69.49', 'PegasusA', '711', '757', '+', '4e', '910', '956']
+            self.single_element[0], overlapped_tail) == \
+                ['15.6', '69.49', 'PegasusA', '1', '209', '+', '4e', '400', '609']
 
-    def test_cut_element_by_other_embedded(self):#TODO
+    def test_cut_element_by_other_embedded(self):
         """Test the cut of element if the head is overlapping"""
-        overlapped_head = ['37.4', '69.49', 'PegasusA', '699', '757', '+', '4e', '898', '956']
-      
+        overlapped_embed = ['37.4', '69.49', 'PegasusA', '211', '709', '+', '4e', '898', '956']
+    
         assert deoverlap.cut_element_by_other(
-            self.single_element[0], overlapped_head) == \
-                ['29.7', '69.49', 'PegasusA', '711', '757', '+', '4e', '910', '956']
-
+            self.single_element[0], overlapped_embed) == []
 
     def test_cut_elements_one_element(self):
         """Test the cut of only one element. Should return the same element
