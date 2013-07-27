@@ -11,7 +11,7 @@ config.read("config.cfg")
 output_path = config.get("paths", "output_db")
 
 def blast(query, subject, evalue, word, penalty, reward, gapopen, gapextend):
-    #Run the blast
+    """This is a docstring"""
     p = Process(target=utils.blastn, args=(query, subject, evalue, word, 
         penalty, reward, gapopen, gapextend,))
     p.start()

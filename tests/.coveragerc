@@ -1,0 +1,5 @@
+[report]
+omit=/usr/lib/python2.7/site-packages/nose/*, *test*
+
+exclude_lines =
+    if __name__ == .__main__.:
