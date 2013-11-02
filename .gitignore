@@ -1,5 +1,3 @@
-*.pyc
-tests/blast_output/
-tests/htmlcov/
-tests/.coverage
-
+bin/
+include/
+lib/
