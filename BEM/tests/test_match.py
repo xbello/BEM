@@ -1,4 +1,4 @@
-import match
+from BEM import match
 
 class testMatch():
     def setUp(self):

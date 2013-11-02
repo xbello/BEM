@@ -1,11 +1,17 @@
+import os
+
 from nose.tools import raises
-import parse_blast
+from BEM import parse_blast
 
 class testParseBlastn():
     def setUp(self):
-        self.blast_output = "small_blastn_search.txt"
-        self.HSP_output = open("small_blastn_HSP.txt", "r").readlines()
-        self.parsed_output = "small_blastn_output.txt"
+        self.path = os.path.dirname(__file__)
+        self.blast_output = os.path.join(
+            self.path, "small_blastn_search.txt")
+        self.HSP_output = open(os.path.join(
+            self.path, "small_blastn_HSP.txt"), "r").readlines()
+        self.parsed_output = os.path.join(
+            self.path, "small_blastn_output.txt")
         self.blast_expected = open(self.parsed_output, "r").readlines()
 
     def test_blast_table_consumer(self):

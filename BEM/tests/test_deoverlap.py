@@ -1,11 +1,17 @@
-import deoverlap
+import os
+
+from BEM import deoverlap
+
 
 class testDeoverlap():
     def setUp(self):
-        unsorted_file = open("test_deoverlap.txt", "r").readlines()
+        self.path = os.path.dirname(__file__)
+        self.unsorted_filename = os.path.join(self.path, "test_deoverlap.txt")
+        unsorted_file = open(self.unsorted_filename, "r").readlines()
         self.unsorted_elements = [x.split() for x in unsorted_file]
 
-        sorted_file = open("test_deoverlap_sorted.txt", "r").readlines()
+        sorted_file = open(os.path.join(
+            self.path, "test_deoverlap_sorted.txt"), "r").readlines()
         self.sorted_elements = [x.split() for x in sorted_file]
 
         self.unsorted_single_element = [["38.8", "81.25", "PegasusA", "210",
@@ -22,8 +28,6 @@ class testDeoverlap():
         """Check if the sorting is doing the sort by score
         """
         deoverlap.sort_by_score(self.unsorted_elements)
-        print self.unsorted_elements
-        print self.sorted_elements
         assert self.unsorted_elements ==\
             self.sorted_elements
 
@@ -78,6 +82,6 @@ class testDeoverlap():
         """
         #load_input_file does a cut_element that removes elements under a
         # MIN_LENGTH, so self.unsorted_elements may have more elements.
-        deoverlapped = deoverlap.load_input_file("test_deoverlap.txt")
+        deoverlapped = deoverlap.load_input_file(self.unsorted_filename)
         assert deoverlapped == self.unsorted_and_cut_elements
 
