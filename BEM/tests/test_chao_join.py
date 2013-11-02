@@ -1,8 +1,12 @@
-import chao_join
+import os
+
+from BEM import chao_join
 
 class testChaoJoin():
     def setUp(self):
-        self.file_h = open("test_chao_join_unjoin.txt", "r").readlines()
+        self.path = os.path.dirname(__file__)
+        self.file_h = open(os.path.join(
+            self.path, "test_chao_join_unjoin.txt"), "r").readlines()
 
     def test_gap(self):
         assert (chao_join.gap(100, 5, 5) == 505)
