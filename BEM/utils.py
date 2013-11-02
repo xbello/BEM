@@ -72,10 +72,12 @@ def multicore(subject, config, cores=1):
     created_subjects = []
     core = 0
     for record in subject_records:
-        if not os.path.isdir(os.path.join(output_path, str(core))):
-            os.makedirs(os.path.join(output_path, str(core)))
+        target_dir = os.path.join(output_path, str(core))
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
 
-        file_path = os.path.join(output_path, str(core), subject)
+        file_path = os.path.join(target_dir, subject)
+
         if file_path not in created_subjects:
             created_subjects.append(file_path)
 

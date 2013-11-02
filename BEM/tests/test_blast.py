@@ -1,8 +1,8 @@
 import ConfigParser
 import os
 
-import blast
-import utils
+from BEM import blast
+from BEM import utils
 
 def test_config_file():
     '''config.cfg exists and is parseable'''
@@ -25,12 +25,13 @@ def test_config_file_paths():
                 config.get("binaries", file_name))),\
             "Path doesn't exist: {0}".format(config.get("binaries", file_name))
 
-class testFormatDatabase():
+class nestFormatDatabase():
     def setUp(self):
         self.config = ConfigParser.RawConfigParser()
         self.config.read('config.cfg')
-        self.fasta = "subject.fas"
-        self.db_path = os.path.join(self.config.get("paths", "output_db"))
+        self.path = os.path.split(__file__)[0]
+        self.fasta = os.path.join(self.path, "subject.fas")
+        self.db_path = os.path.join(self.path, "output_db")
         self.expected = ["subject.fas.nhr", "subject.fas.nin",
             "subject.fas.nsq"]
 
@@ -53,12 +54,13 @@ class testFormatDatabase():
                 "File doesn't exist after format database: {0}".format(
                 os.path.join(self.db_path, file_name))
 
-class testBlastN():
+class nestBlastN():
     def setUp(self):
         self.config = ConfigParser.RawConfigParser()
         self.config.read('config.cfg')
-        self.subject = "subject.fas"
-        self.query = "dna_query.fas"
+        self.path = os.path.split(__file__)[0]
+        self.subject = os.path.join(self.path, "subject.fas")
+        self.query = os.path.join(self.path, "dna_query.fas")
  
         utils.format_database(self.subject, "nucl", self.config)
 
@@ -86,47 +88,57 @@ class testBlastN():
             assert os.path.isfile(os.path.join(
                 self.config.get("paths", "output_db"), x)),\
                 "File doesn't exist after blasting: {0}".format(
-                    os.path.join(self.config.get("paths", "output_blast"), x))
+                    os.path.join(self.path, "blast_output", x))
 
     def test_validate_output(self):
        utils.blastn(self.query, self.subject, self.config)
 
-       with open(os.path.join(self.config.get(
-           "paths", "output_blast"), self.subject + ".blast"), "r") as output:
-            assert output.readlines()[0].split() == \
-                ["Mock_DNA_sequence", "Drosophila", "99.48", "382", "0", "1",
-                 "1", "382", "67", "446", "2e-128", "445"]
+       with open(os.path.join(self.path, "blast_output",
+           self.subject + ".blast"), "r") as output:
+           assert output.readlines()[0].split() == \
+               ["Mock_DNA_sequence", "Drosophila", "99.48", "382", "0", "1",
+                "1", "382", "67", "446", "2e-128", "445"]
 
 class testMulticore():
     def setUp(self):
+        self.path = os.path.dirname(__file__)
         self.config = ConfigParser.RawConfigParser()
-        self.config.read('config.cfg')
+        self.config.read(os.path.join(self.path, 'config.cfg'))
+        self.config.set('paths', 'output_db', os.path.join(self.path,
+            self.config.get('paths', 'output_db')))
+        self.config.set('paths', 'input_path', os.path.join(self.path,
+            self.config.get('paths', 'input_path')))
         self.subject = "subject_multicore.fas"
 
-        utils.multicore(self.subject, self.config, cores=4)
+        #Simulate multicores even on monocore enviroments
+        self.CORES = 4
+        utils.multicore(self.subject, self.config, cores=self.CORES)
 
     def tearDown(self):
-        for core in range(4):
-             core_path = os.path.join(
-                 self.config.get("paths", "output_db"), str(core))
-             os.unlink(os.path.join(core_path, self.subject))
-             os.rmdir(core_path)
+        for core in range(self.CORES):
+            core_path = os.path.join(
+                self.config.get('paths', 'output_db'), str(core))
+            core_path_file = os.path.join(core_path, self.subject)
+            os.unlink(core_path_file)
+            os.rmdir(core_path)
 
     def test_multicore_split(self):
-        for core in range(4): 
-            core_path_file = os.path.join(self.config.get(
-                "paths", "output_db"), str(core), self.subject)
+        for core in range(self.CORES):
+            
+            core_path_file = os.path.join(
+                self.config.get('paths', 'output_db'), str(core), self.subject)
 
             assert os.path.isfile(core_path_file),\
                 "File doesn't exist {0}".format(core_path_file)
 
     def test_file_content(self):
-        for core in range(4):
-            core_path_file = os.path.join(self.config.get(
-                "paths", "output_db"), str(core), self.subject)
+        for core in range(self.CORES):
+            core_path_file = os.path.join(
+                self.config.get('paths', 'output_db'), str(core), self.subject)
 
             content = open(core_path_file, "r").readlines()
-            expected = open("multicore_splitted.fas", "r").readlines()
+            expected = open(os.path.join(self.path, "multicore_splitted.fas"),
+                "r").readlines()
             expected[0] = expected[0].replace("X", str(core + 1))
             assert content == expected,\
                 "File content didn't match {0}\n{1}".format(
