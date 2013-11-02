@@ -25,13 +25,17 @@ def test_config_file_paths():
                 config.get("binaries", file_name))),\
             "Path doesn't exist: {0}".format(config.get("binaries", file_name))
 
-class nestFormatDatabase():
+class testFormatDatabase():
     def setUp(self):
-        self.config = ConfigParser.RawConfigParser()
-        self.config.read('config.cfg')
         self.path = os.path.split(__file__)[0]
-        self.fasta = os.path.join(self.path, "subject.fas")
-        self.db_path = os.path.join(self.path, "output_db")
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read(os.path.join(self.path, 'config.cfg'))
+        self.config.set('paths', 'output_db', os.path.join(self.path,
+            self.config.get('paths', 'output_db')))
+        self.config.set('paths', 'input_path', os.path.join(self.path,
+            self.config.get('paths', 'input_path')))
+        self.fasta = "subject.fas"
+        self.db_path = self.config.get("paths", "output_db")
         self.expected = ["subject.fas.nhr", "subject.fas.nin",
             "subject.fas.nsq"]
 
@@ -54,12 +58,20 @@ class nestFormatDatabase():
                 "File doesn't exist after format database: {0}".format(
                 os.path.join(self.db_path, file_name))
 
-class nestBlastN():
+class testBlastN():
     def setUp(self):
+        self.path = os.path.split(__file__)[0]
         self.config = ConfigParser.RawConfigParser()
         self.config.read('config.cfg')
-        self.path = os.path.split(__file__)[0]
-        self.subject = os.path.join(self.path, "subject.fas")
+        self.config.read(os.path.join(self.path, 'config.cfg'))
+        self.config.set('paths', 'output_db', os.path.join(self.path,
+            self.config.get('paths', 'output_db')))
+        self.config.set('paths', 'input_path', os.path.join(self.path,
+            self.config.get('paths', 'input_path')))
+        self.config.set('paths', 'output_blast', os.path.join(self.path,
+            self.config.get('paths', 'output_blast')))
+
+        self.subject = "subject.fas"
         self.query = os.path.join(self.path, "dna_query.fas")
  
         utils.format_database(self.subject, "nucl", self.config)
@@ -93,7 +105,7 @@ class nestBlastN():
     def test_validate_output(self):
        utils.blastn(self.query, self.subject, self.config)
 
-       with open(os.path.join(self.path, "blast_output",
+       with open(os.path.join(self.config.get("paths", "output_blast"),
            self.subject + ".blast"), "r") as output:
            assert output.readlines()[0].split() == \
                ["Mock_DNA_sequence", "Drosophila", "99.48", "382", "0", "1",

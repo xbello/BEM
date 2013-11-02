@@ -11,6 +11,10 @@ def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
     binary = config.get("binaries", "blastn")
     output_db = config.get("paths", "output_db")
     output_blast = config.get("paths", "output_blast")
+
+    if not os.path.isdir(output_blast):
+        os.makedirs(output_blast)
+
     input_path = config.get("paths", "input_path")
 
     assert os.path.isfile(os.path.join(input_path, query)),\
@@ -30,8 +34,6 @@ def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
         "-gapopen", gapopen,
         "-gapextend", gapextend]
 
-    print " ".join(command)
-
     sub = subprocess.Popen(command)
     sub.communicate()
 
@@ -45,6 +47,8 @@ def format_database(fasta_src, db_type, config):
     binary = config.get("binaries", "makeblastdb")
     binary_path = config.get("binaries", "blast")
     output_path = config.get("paths", "output_db")
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path)
     input_path = config.get("paths", "input_path")
 
     command = [os.path.join(binary_path, binary),
@@ -52,7 +56,7 @@ def format_database(fasta_src, db_type, config):
         "-out", os.path.join(output_path, fasta_src),
         "-dbtype", db_type]
 
-    sub = subprocess.Popen(command)
+    sub = subprocess.Popen(command, stdout=subprocess.PIPE)
     sub.communicate()
 
     return command
