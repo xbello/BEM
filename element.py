@@ -2,6 +2,8 @@ class Element(object):
     def __init__(self, *args, **kwargs):
         size = kwargs.get("size", 0)
         superfamily = kwargs.get("superfamily", None)
+        sequence = kwargs.get("sequence", None)
+        genbank_id = kwargs.get("genbank_id", None)
 
 class Retroelement(Element):
     def __init__(self, *args, **kwargs):
