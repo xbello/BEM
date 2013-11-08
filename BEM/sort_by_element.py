@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import operator
-import os
 import sys
 
 from defs import *
@@ -11,7 +10,7 @@ the elements by chromosome, then for element, then for direction, then for
 insertion point and then for score.
 
 After that sorting, all the elements of a chromosome (contig) are sequentially
-positioned, and thus we can join/cut/delete all elements that can be joined, 
+positioned, and thus we can join/cut/delete all elements that can be joined,
 are overlapped or directly embedded.
 
 The line type is:
@@ -27,11 +26,12 @@ Where (zero indexed):
  [0] is the score
 """
 
+
 def sort_file(i_file):
     """filename --> list
     """
-    gets = operator.itemgetter(SUBJECT_NAME, QUERY_NAME, DIR, INIT_Q_POINT,
-       SCORE)
+    gets = operator.itemgetter(
+        SUBJECT_NAME, QUERY_NAME, DIR, INIT_Q_POINT, SCORE)
 
     lines = []
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         Utilizacion:
         {0} input
         e.g.
-        
+
            {0} input.txt
            {0} input.txt > output.txt
         '''.format(__file__)
@@ -60,4 +60,3 @@ if __name__ == "__main__":
 
     for line in sort_file(i_file):
         print " ".join(line)
-

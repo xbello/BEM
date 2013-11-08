@@ -1,11 +1,9 @@
-from Bio import SeqIO
-
-import ConfigParser
 import os
 import subprocess
 
+
 def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
-    gapopen="10", gapextend="6", word="11"):
+           gapopen="10", gapextend="6", word="11"):
     '''Blastn the query sequence against the subject'''
     binary_path = config.get("binaries", "blast")
     binary = config.get("binaries", "blastn")
@@ -22,7 +20,8 @@ def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
     assert os.path.isfile(os.path.join(input_path, subject)),\
         "{0} not found".format(subject)
 
-    command = [os.path.join(binary_path, binary),
+    command = [
+        os.path.join(binary_path, binary),
         "-db", os.path.join(output_db, subject),
         "-query", os.path.join(input_path, query),
         "-out", os.path.join(output_blast, "{0}.blast".format(subject)),
@@ -39,6 +38,7 @@ def blastn(query, subject, config, evalue="5", penalty="-4", reward="5",
 
     return command
 
+
 def format_database(fasta_src, db_type, config):
     '''Format a database to use with NCBI BLAST.
     db_type is nucl or prot'''
@@ -51,7 +51,8 @@ def format_database(fasta_src, db_type, config):
         os.makedirs(output_path)
     input_path = config.get("paths", "input_path")
 
-    command = [os.path.join(binary_path, binary),
+    command = [
+        os.path.join(binary_path, binary),
         "-in", os.path.join(input_path, fasta_src),
         "-out", os.path.join(output_path, fasta_src),
         "-dbtype", db_type]
@@ -60,6 +61,7 @@ def format_database(fasta_src, db_type, config):
     sub.communicate()
 
     return command
+
 
 def multicore(subject, config, cores=1):
     '''Prepare a blast to run in multicore mode.

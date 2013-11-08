@@ -3,6 +3,7 @@ def gap(gap_length, gapopen, gapextend):
     '''Calculates the gap penalty on opening a gap o lenght gap_length'''
     return gapopen + (gap_length * gapextend)
 
+
 def calc_diagonals(checker, checked):
     '''Calculates the diagonal of two fragments.
 
@@ -20,6 +21,7 @@ def calc_diagonals(checker, checked):
         diagonal_checked = int(checked[5]) - int(checked[10])
 
     return diagonal_checker, diagonal_checked
+
 
 def calc_penalty(checker, checked, mismatch, gapopen, gapextend):
     '''Estimates the penalty of joining the fragment checker with checked.
@@ -41,7 +43,8 @@ def calc_penalty(checker, checked, mismatch, gapopen, gapextend):
             abs((checker[10] - checked[10] - module) * mismatch)
 
     return penalty
-        
+
+
 def is_joinable(checker, checked, mismatch, gapopen, gapextend):
     '''Tests if a couple of matches are joinable.
 
@@ -52,10 +55,11 @@ def is_joinable(checker, checked, mismatch, gapopen, gapextend):
 
     penalty = calc_penalty(checker, checked, mismatch, gapopen, gapextend)
 
-    if (penalty < min(checked[0], checker[0]) and #cost to join
-        checked[4] == checker[4] and #same chromosome
-        checked[9] == checker[9] and #same query
-        checked[8] == checker[8]): #same direction
+    if (penalty < min(checked[0], checker[0]) and  # cost to join
+            checked[4] == checker[4] and  # same chromosome
+            checked[9] == checker[9] and  # same query
+            checked[8] == checker[8]):  # same direction
+
         return True
     else:
         return False

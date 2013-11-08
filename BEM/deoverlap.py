@@ -8,25 +8,26 @@ from defs import *
 sequences seems to be ocupying the same spot.
 """
 
+
 def adjust_score(element, old_length):
     """list, int -> (list)
 
-    Adjust the new score of a post-cut element. We are going to assume that 
+    Adjust the new score of a post-cut element. We are going to assume that
     every base of the match provides the same amount of score.
     """
     old_score = float(element[0])
-    
+
     score_per_base = 0.0
     if old_score > 0:
         score_per_base = old_score / old_length
 
-    new_length = abs(int(element[END_Q_POINT]) - \
-                 int(element[INIT_Q_POINT]))
+    new_length = abs(int(element[END_Q_POINT]) -
+                     int(element[INIT_Q_POINT]))
 
     element[0] = "{0:.1f}".format(new_length * score_per_base)
 
     return element
-   
+
 
 def cut_elements_by_group(elements, top_element):
     """list of lists, list -> (list of lists)
@@ -42,11 +43,12 @@ def cut_elements_by_group(elements, top_element):
         if cut_element:
             return_list.append(cut_element)
 
-    return return_list 
+    return return_list
+
 
 def cut_element_by_other(cutter, to_cut):
     """list, list --> (list)
-    
+
     Cut the "to_cut" element by the "cutter" element, returning the left of
     "to_cut" element
     """
@@ -69,8 +71,8 @@ def cut_element_by_other(cutter, to_cut):
         to_cut[END_S_POINT] = to_cut[END_S_POINT] - lost_span
 
     elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
-         to_cut[INIT_Q_POINT] < cutter[END_Q_POINT] and\
-         to_cut[END_Q_POINT] > cutter[END_Q_POINT]:
+            to_cut[INIT_Q_POINT] < cutter[END_Q_POINT] and\
+            to_cut[END_Q_POINT] > cutter[END_Q_POINT]:
         # Element starts inside reference, and ends after its end.
         # -> Cut the head
         lost_span = abs(cutter[END_Q_POINT] - to_cut[INIT_Q_POINT]) + 1
@@ -78,7 +80,7 @@ def cut_element_by_other(cutter, to_cut):
         to_cut[INIT_S_POINT] = to_cut[INIT_S_POINT] + lost_span
 
     elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
-         to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
+            to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
         # Element is embedded
         # -> Delete it
         return []
@@ -89,7 +91,8 @@ def cut_element_by_other(cutter, to_cut):
 
     return to_cut
 
-def cut_elements(list_of_lines, return_list = []):
+
+def cut_elements(list_of_lines, return_list=[]):
     """list of lists, list of lists --> (list_of_lists)
 
     Cut the element of least score by the element of higher score, returning
@@ -103,23 +106,24 @@ def cut_elements(list_of_lines, return_list = []):
     if len(list_of_lines) == 1 and not return_list:
         #If we got only one match, don't lose time
         return list_of_lines
- 
+
     if len(list_of_lines) > 1:
         ref = list_of_lines.pop(0)
- 
+
         if abs(int(ref[INIT_Q_POINT]) - int(ref[END_Q_POINT])) < MIN_LENGTH:
             #Sequence is too short to be saved. Don't save and rerun
-            cut_elements(list_of_lines, return_list = return_list)
+            cut_elements(list_of_lines, return_list=return_list)
         else:
             return_list.append(ref)
 
         list_of_lines = cut_elements_by_group(list_of_lines, ref)
-  
-        cut_elements(list_of_lines, return_list = return_list)
-           
+
+        cut_elements(list_of_lines, return_list=return_list)
+
     return return_list
 
-def clean_embedded(list_of_lines, return_list = []):
+
+def clean_embedded(list_of_lines, return_list=[]):
     """list of lists, list of lists --> (list_of_lists)
 
     Deletes all the elements that seems to be embedded or exact match elements,
@@ -131,11 +135,11 @@ def clean_embedded(list_of_lines, return_list = []):
         # the same element, the same contig and the same direction
 
         if int(list_of_lines[1][END_Q_POINT]) <=\
-            int(list_of_lines[0][END_Q_POINT]):
+           int(list_of_lines[0][END_Q_POINT]):
             #The after reference line is embedded in the reference, delete it
             list_of_lines.pop(1)
         elif int(list_of_lines[0][INIT_Q_POINT]) ==\
-            int(list_of_lines[1][INIT_Q_POINT]):
+                int(list_of_lines[1][INIT_Q_POINT]):
             # The reference is embedded in the next element, delete it.
             #
             # (First equal in both, but last higher in second element implied
@@ -155,13 +159,14 @@ def clean_embedded(list_of_lines, return_list = []):
 
     return return_list
 
+
 def load_input_file(i_file):
     """filename --> (list)
-    
+
     Loads and processes a sorted input to cut the overlapped elements
     """
     group = []
- 
+
     ret_list = []
 
     with open(i_file, "rU") as i_file:
@@ -179,20 +184,21 @@ def load_input_file(i_file):
                    this_line[QUERY_NAME] == group[0][QUERY_NAME]:
                     group.append(this_line)
                 else:
-                   # A different element has been found.
-                   # Now clean the group
-                   non_embedded = clean_embedded(group, return_list = [])
-                   for out_line in cut_elements(non_embedded):
-                       ret_list.append(out_line)
+                    # A different element has been found.
+                    # Now clean the group
+                    non_embedded = clean_embedded(group, return_list=[])
+                    for out_line in cut_elements(non_embedded):
+                        ret_list.append(out_line)
 
-                   group = [this_line] #And initialize it again
+                    group = [this_line]  # And initialize it again
     #And now the last group of the file
-    non_embedded = clean_embedded(group, return_list = [])
-    cutted_elements = cut_elements(non_embedded, return_list = [])
+    non_embedded = clean_embedded(group, return_list=[])
+    cutted_elements = cut_elements(non_embedded, return_list=[])
     for out_line in cutted_elements:
         ret_list.append(out_line)
 
     return ret_list
+
 
 def sort_by_score(list_of_elements):
     """list of lists -> None
@@ -205,7 +211,7 @@ def sort_by_score(list_of_elements):
     1211.0 100.0 query_name 1 1027 + subject_name 237 1263
 
     where (zero indexed):
-    
+
      [0] is the score
      [1] is the similarity
     """
@@ -224,6 +230,7 @@ def sort_by_score(list_of_elements):
 
     return True
 
+
 def int_to_str(element):
     """Transform the int points of an element (INIT and END points of
     both query and subject) into strings.
@@ -233,6 +240,7 @@ def int_to_str(element):
         element[p] = str(element[p])
 
     return element
+
 
 def str_to_int(element):
     """Transform the int-erable points of an element (INIT and END points of
@@ -244,6 +252,7 @@ def str_to_int(element):
 
     return element
 
+
 if __name__ == "__main__":
     try:
         i_file = sys.argv[1]
@@ -252,7 +261,7 @@ if __name__ == "__main__":
         Utilizacion:
         {0} input
         e.g.
-        
+
            {0} input.txt
            {0} input.txt > output.txt
         '''.format(__file__)
@@ -262,4 +271,3 @@ if __name__ == "__main__":
     non_embedded = load_input_file(i_file)
     for x in non_embedded:
         print " ".join(x)
-

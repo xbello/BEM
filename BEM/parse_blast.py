@@ -1,25 +1,31 @@
 
-WUBLAST_HSP_KEYS = ["query", "subject", "e_val", "n_scores",
+WUBLAST_HSP_KEYS = [
+    "query", "subject", "e_val", "n_scores",
     "score_norm", "score", "length", "idents", "matchs", "n_mismatch",
     "identity", "pc_pos", "n_gaps", "gap_len", "subject_gaps",
     "subject_gap_len", "query_frame", "query_start", "query_end",
     "subject_frame", "subject_start", "subject_end"]
 
-BLAST_HSP_KEYS = ["query", "subject", "identity", "length", "n_mismatch",
+BLAST_HSP_KEYS = [
+    "query", "subject", "identity", "length", "n_mismatch",
     "n_gaps", "query_start", "query_end", "subject_start", "subject_end",
     "e_val", "score"]
 
+
 def select_blaster_keys(splitted_line):
     """list -> (dict)
-    
+
     Given a line of tabular output, return the header keys of the blaster.
     This is a line from WU-BLAST:
-     "Query    Subject 1.4e-11 1       71.62   437     520     307     307     172     59.04   59.04   18      18      21      23      -1      3651    3150    +1      396     892"
-    
+     "Query    Subject 1.4e-11 1       71.62   437     520     307     307
+     172     59.04   59.04   18      18      21      23      -1      3651
+     3150    +1      396     892"
+
     22 columns divided by \t
 
     This is a line from BLAST:
-     "Query       Subject      100.00  1027    0       0       1       1027    237     1263    0.0     1211"
+     "Query       Subject      100.00  1027    0       0       1       1027
+     237     1263    0.0     1211"
 
      12 columns divided by \t
     """
@@ -29,7 +35,8 @@ def select_blaster_keys(splitted_line):
     elif len(splitted_line) == 12:
         return BLAST_HSP_KEYS
     else:
-        raise Exception, "BLAST output cannot be determined"
+        raise Exception("BLAST output cannot be determined")
+
 
 def blast_table_consumer(blast_output_file):
     '''Consume a blast file, yielding a dict entry:
@@ -50,7 +57,7 @@ def blast_table_consumer(blast_output_file):
 
     with open(blast_output_file, "r") as blast_output:
         for line in blast_output:
-            
+
             data = line.strip().split("\t")
 
             HSP_keys = select_blaster_keys(data)
@@ -59,17 +66,20 @@ def blast_table_consumer(blast_output_file):
             for fl in ["identity", "e_val", "score"]:
                 HSP[fl] = float(data[HSP_keys.index(fl)])
             for integer in ["length", "n_mismatch", "n_gaps", "query_start",
-                "query_start", "query_end", "subject_start", "subject_end"]:
+                            "query_start", "query_end", "subject_start",
+                            "subject_end"]:
                 HSP[integer] = int(data[HSP_keys.index(integer)])
             for strin in ["query", "subject"]:
                 HSP[strin] = data[HSP_keys.index(strin)]
 
             yield HSP
 
+
 def write_parsed(HSP_dict):
-    '''From a dict yielded from blast_table_consumer, write a line to the 
+    '''From a dict yielded from blast_table_consumer, write a line to the
     stdout'''
-    header = ["score", "identity", "query", "query_start", "query_end",
+    header = [
+        "score", "identity", "query", "query_start", "query_end",
         "direction", "subject", "subject_start", "subject_end"]
 
     HSP_dict["direction"] = "+"
@@ -99,7 +109,7 @@ if __name__ == "__main__":
         Utilizacion:
         {0} input
         e.g.
-        
+
            {0} input.txt
            {0} input.txt > output.txt
         '''.format(__file__)

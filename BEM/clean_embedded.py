@@ -5,7 +5,8 @@ import sys
 to be embedded or equal to another of the same class.
 """
 
-def clean_embedded(list_of_lines, return_list = []):
+
+def clean_embedded(list_of_lines, return_list=[]):
     """list of lists, list of lists --> (list_of_lists)
 
     Deletes all the elements that seems to be embedded or exact match elements,
@@ -38,26 +39,27 @@ def clean_embedded(list_of_lines, return_list = []):
 
     return return_list
 
-def cut_elements(list_of_lines):
-   """list of lists --> (list_of_lists)
 
-   Cut the element of least score by the element of higher score, returning
-   the parts left of the elements.
-   """
-   if len(list_of_lines) > 1:
-       for element in list_of_lines:
-           # TODO: 
+def cut_elements(list_of_lines):
+    """list of lists --> (list_of_lists)
+
+    Cut the element of least score by the element of higher score, returning
+    the parts left of the elements.
+    """
+    if len(list_of_lines) > 1:
+        for element in list_of_lines:
+           # TODO:
            # If cutted element is less than 1 bp, pop it, and don't advance
            # Otherwise, keep cutting and advancing
-           
-           pass
-   else:
-       return list_of_lines
+
+            pass
+    else:
+        return list_of_lines
 
 
 def load_input_file(i_file):
     """filename --> (None)
-    
+
     Loads and processes a sorted input to clean the embedded elements
     """
     group = []
@@ -78,10 +80,10 @@ def load_input_file(i_file):
                     group.append(this_line)
                 else:
                    #Now clean the group
-                   for out_line in clean_embedded(group, return_list = []):
-                       print " ".join(out_line)
-                   group = [this_line] #And initialize it again
-                   
+                    for out_line in clean_embedded(group, return_list=[]):
+                        print " ".join(out_line)
+                    group = [this_line]  # And initialize it again
+
 
 if __name__ == "__main__":
     try:
@@ -91,7 +93,7 @@ if __name__ == "__main__":
         Utilizacion:
         {0} input
         e.g.
-        
+
            {0} input.txt
            {0} input.txt > output.txt
         '''.format(__file__)
@@ -99,4 +101,3 @@ if __name__ == "__main__":
         sys.exit()
 
     load_input_file(i_file)
-
