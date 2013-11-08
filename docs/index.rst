@@ -9,6 +9,9 @@ Welcome to BEM's documentation!
 Contents:
 
 .. toctree::
+   architecture.rst
+   deployment.rst
+   installation.rst
    :maxdepth: 2
 
 .. automodule:: BEM
