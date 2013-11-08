@@ -67,31 +67,6 @@ def multicore(subject, config, cores=1):
     putting each subject in a subdir.
 
     Depends on Biopython library.'''
-    output_path = config.get("paths", "output_db")
-    input_path = config.get("paths", "input_path")
-
-    subject_records = SeqIO.parse(
-        open(os.path.join(input_path, subject), "r"), "fasta")
-
-    created_subjects = []
-    core = 0
-    for record in subject_records:
-        target_dir = os.path.join(output_path, str(core))
-        if not os.path.isdir(target_dir):
-            os.makedirs(target_dir)
-
-        file_path = os.path.join(target_dir, subject)
-
-        if file_path not in created_subjects:
-            created_subjects.append(file_path)
-
-        mode = ("a" if os.path.isfile(file_path) else "w")
-
-        file_output = open(file_path, mode)
-        file_output.write(">{0}\n{1}\n".format(
-            record.name, str(record.seq)))
-        file_output.close()
-        
-        core = ((core + 1) if core < (cores - 1) else 0)
-
-    return created_subjects
+    # XXX
+    # Multicore should be done calling -num-threads flag on blastn/tblastn
+    pass
