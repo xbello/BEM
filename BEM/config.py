@@ -1,15 +1,39 @@
+"""Deal with the config files.
+
+BEM will try sequentially:
+
+    #) config_file as it comes.
+    #) os.getcwd() + config_file, i.e. the path from where the library is
+    called plus the name that is passed to the function.
+    #) os.environ["BEM_CONFIG"]. If "BEM_CONFIG" is configured, use it.
+
+"""
+
 import ConfigParser
 import os
 
 
-def get_config_values():
-    '''Load and return the config.cfg parser plus config.cfg path'''
-    config = ConfigParser.RawConfigParser()
-    #First try the config.cfg in the same directory
-    if os.path.isfile(os.path.join(os.getcwd(), "config.cfg")):
-        return config.read(os.path.join(os.getcwd(), "config.cfg"))
-    #And then the file in the executable directory
-    elif os.path.isfile(os.path.join(
-            os.path.realpath(__file__), "config.cfg")):
-        return config  # , config.read(os.path.join(
-            #os.path.realpath(__file__), "config.cfg"))
+def read_config_values(config_file_path):
+    """Load and return the config_file_path parsed."""
+
+    config = ConfigParser.SafeConfigParser()
+
+    if os.path.isfile(config_file_path):
+        config.readfp(open(config_file_path))
+        return config
+
+    return False
+
+def get_config_file(config_file_path):
+    """Generate and return the apropriate config parsed ."""
+
+    fallbacks = [config_file_path,
+                 os.path.join(os.getcwd(), config_file_path),
+                 os.environ.get("BEM_CONFIG")]
+
+    for step in fallbacks:
+        config = read_config_values(step)
+        if config:
+            return config
+
+    raise IOError("Config not found in {0}.".format(config_file_path))
