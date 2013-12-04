@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-import operator
-import sys
 
-from defs import *
+"""Sort a crude output from BLAST.
 
-"""The objective of this script is to sort a crude output from BLAST to allow
-the reconstruction of the longest elements possible. For that we aim to group
-the elements by chromosome, then for element, then for direction, then for
-insertion point and then for score.
+That sorted output allows the reconstruction of the longest elements
+possible. For that we aim to group the elements by chromosome, then for
+element, then for direction, then for insertion point and then for score.
 
 After that sorting, all the elements of a chromosome (contig) are sequentially
 positioned, and thus we can join/cut/delete all elements that can be joined,
@@ -24,19 +21,25 @@ Where (zero indexed):
  [5] is the direction
  [3] is the insertion point
  [0] is the score
+
 """
 
+import operator
+import sys
 
-def sort_file(i_file):
-    """filename --> list
-    """
+from defs import *
+
+
+def sort_file(input_file):
+    """Sort the lines on input_file. Returns a list of lines."""
+
     gets = operator.itemgetter(
         SUBJECT_NAME, QUERY_NAME, DIR, INIT_Q_POINT, SCORE)
 
     lines = []
 
-    with open(i_file, "rU") as i_file:
-        for line in i_file:
+    with open(input_file, "rU") as in_file:
+        for line in in_file:
             lines.append(line.strip().split())
 
     lines.sort(key=gets)
