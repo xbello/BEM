@@ -29,11 +29,7 @@ def blastn(query, subject, conf):
         "-gapextend", conf.get("blastn", "gapextend")]
 
 
-    p = Popen(command, stdout=PIPE, stderr=PIPE)
-
-    stdout, stderr = p.communicate()
-
-    return stdout, stderr
+    return run_command(command)
 
 
 def format_db(fasta_src, db_type, conf):
@@ -60,10 +56,17 @@ def format_db(fasta_src, db_type, conf):
         "-out", os.path.join(output_path, fasta_src),
         "-dbtype", db_type]
 
+    return run_command(command)
+
+
+def run_command(command):
+    """Return the output of a command after running it under subprocess."""
+
     sub = Popen(command, stdout=PIPE, stderr=PIPE)
     stdout, stderr = sub.communicate()
 
     return stdout, stderr
+
 
 if __name__ == "__main__":
     from BEM import config
