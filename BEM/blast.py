@@ -2,52 +2,72 @@
 """Proxy for BLASTing sequences."""
 
 import argparse
-import ConfigParser
 import os
-from multiprocessing import cpu_count
 from subprocess import Popen, PIPE
 
-import config
-import utils
 
-
-def blastn(query, subject, config):
+def blastn(query, subject, conf):
     """Launch a blastn."""
-    num_threads = cpu_count()
 
     binary = os.path.join(
-        config.get("binaries", "blast"),
-        config.get("binaries", "blastn"))
+        conf.get("binaries", "blast"),
+        conf.get("binaries", "blastn"))
 
-    output_db = config.get("paths", "output_db")
-    output_blast = config.get("paths", "output_blast")
-
-    input_path = config.get("paths", "input_path")
-
-    # Don't be too greedy, and lift one core to the user if there're many
-    if num_threads > 1:
-        num_threads -= 1
+    output_db = conf.get("paths", "output_db")
+    input_path = conf.get("paths", "input_path")
 
     command = [
         binary,
         "-query", os.path.join(input_path, query),
-        "-subject", subject,
         "-db", os.path.join(output_db, subject),
-        "-outfmt", "6"]
+        "-outfmt", "6",
+        "-evalue", conf.get("blastn", "evalue"),
+        "-word_size", conf.get("blastn", "word"),
+        "-penalty", conf.get("blastn", "penalty"),
+        "-reward", conf.get("blastn", "reward"),
+        "-gapopen", conf.get("blastn", "gapopen"),
+        "-gapextend", conf.get("blastn", "gapextend")]
 
-    # TODO: add here all blast options
 
-    p = Popen(command)
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
 
-    p.communicate()
+    stdout, stderr = p.communicate()
+
+    return stdout, stderr
 
 
-def format_db(subject, db_type):
-    utils.format_database(subject, db_type, config)
+def format_db(fasta_src, db_type, conf):
+    """Return the output after formating a database to use with NCBI BLAST.
 
-    return True
+    db_type is ``nucl`` or ``prot``.
+
+    """
+
+    assert db_type in ["nucl", "prot"]
+
+    binary = conf.get("binaries", "makeblastdb")
+    binary_path = conf.get("binaries", "blast")
+    output_path = conf.get("paths", "output_db")
+
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path)
+
+    input_path = conf.get("paths", "input_path")
+
+    command = [
+        os.path.join(binary_path, binary),
+        "-in", os.path.join(input_path, fasta_src),
+        "-out", os.path.join(output_path, fasta_src),
+        "-dbtype", db_type]
+
+    sub = Popen(command, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = sub.communicate()
+
+    return stdout, stderr
 
 if __name__ == "__main__":
+    from BEM import config
+
     parser = argparse.ArgumentParser(description="Runs a blast.")
     parser.add_argument("--query", dest="query", required=True)
     parser.add_argument("--subject", dest="subject", required=True)
@@ -56,14 +76,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config_values = config.get_config_file(config)
+    config_values = config.get_config_file(args.config)
 
     if args.strategy == "blastn":
-        format_db(args.subject, "nucl")
-        blastn(args.query,
-               args.subject,
-               config)
+        format_db(args.subject, "nucl", config_values)
+        blastn(args.query, args.subject, config_values)
 
     elif args.strategy == "tblastn":
-        format_db(args.subject, "prot")
-
+        format_db(args.subject, "prot", config_values)

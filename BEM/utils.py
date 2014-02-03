@@ -47,6 +47,7 @@ def format_database(fasta_src, db_type, config):
     binary = config.get("binaries", "makeblastdb")
     binary_path = config.get("binaries", "blast")
     output_path = config.get("paths", "output_db")
+    print output_path
     if not os.path.isdir(output_path):
         os.makedirs(output_path)
     input_path = config.get("paths", "input_path")
