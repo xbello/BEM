@@ -44,7 +44,9 @@ class Match(object):
                      max(self.query[1], other.query[1]))
             subject = (min(self.subject[0], other.subject[0]),
                        max(self.subject[1], other.subject[1]))
-            score = (self.score + other.score) / abs(max(query) - min(query))
+            # TODO: This is a rough approach. Here we need the gap open, extend
+            # and mismatches corrections.
+            score = ((self.score + other.score) / abs(max(query) - min(query)))
 
             return Match(query_name=self.query_name,
                          subject_name=self.subject_name,
@@ -53,3 +55,5 @@ class Match(object):
                          score=score,
                          query=query,
                          subject=subject)
+        else:
+            raise ValueError("Matches cannot be added.")
