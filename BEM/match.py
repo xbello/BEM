@@ -12,11 +12,14 @@ class Match(object):
         self.subject = kwargs.get("subject", (0, 0))
         self.chromosome = kwargs.get("chromosome", "")
         self.orientation = kwargs.get("orientation", "+")  # Or "C"
+        self.score = kwargs.get("score", 0.0)
 
     def _same_family(self, other):
         """Return True if self and other are the same match family."""
         return ((self.query_name == other.query_name) and
-                (self.subject_name == other.subject_name))
+                (self.subject_name == other.subject_name and
+                 self.orientation == other.orientation and
+                 self.chromosome == other.chromosome))
 
     def __eq__(self, other):
         return ((self.query[0] == other.query[0]) and
@@ -34,4 +37,19 @@ class Match(object):
                 (self._same_family(other)))
 
     def __add__(self, other):
-        pass
+        """Return a Match resulting from adding two matches."""
+        if self._same_family(other):
+
+            query = (min(self.query[0], other.query[0]),
+                     max(self.query[1], other.query[1]))
+            subject = (min(self.subject[0], other.subject[0]),
+                       max(self.subject[1], other.subject[1]))
+            score = (self.score + other.score) / abs(max(query) - min(query))
+
+            return Match(query_name=self.query_name,
+                         subject_name=self.subject_name,
+                         self_chromosome=self.chromosome,
+                         orientation=self.orientation,
+                         score=score,
+                         query=query,
+                         subject=subject)

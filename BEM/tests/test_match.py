@@ -29,6 +29,24 @@ class testMatch(TestCase):
         self.assertEqual(self.match3.subject, (5000, 5990))
         self.assertEqual(self.match3.orientation, "C")
 
+    def test_add(self):
+        """Test the addition of two matches."""
+        match_added = match.Match(query_name="Query_1",
+                                  subject_name="Subject_1",
+                                  query=(0, 1000),
+                                  subject=(5000, 6000),
+                                  score=0.8)
+        self.match1.query_name = self.match2.query_name = "Query_1"
+        self.match1.subject_name = self.match2.subject_name = "Subject_1"
+        self.match1.query = (0, 400)
+        self.match2.query = (600, 1000)
+        self.match1.subject = (5000, 5400)
+        self.match2.subject = (5600, 6000)
+
+        self.match1.score = self.match2.score = 400.0
+
+        self.assertTrue(match_added == (self.match1 + self.match2))
+
     def test_eq(self):
         """Test that two match objects are equal to join.
 
