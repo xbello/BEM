@@ -13,6 +13,10 @@ class Match(object):
         self.chromosome = kwargs.get("chromosome", "")
         self.orientation = kwargs.get("orientation", "+")  # Or "C"
         self.score = kwargs.get("score", 0.0)
+        self.penalties = kwargs.get("penalties",
+                                    {"gap_open": 2,
+                                     "gap_extend": 2,
+                                     "mismatch": 1})
 
     def _same_family(self, other):
         """Return True if self and other are the same match family."""
