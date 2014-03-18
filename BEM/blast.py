@@ -3,7 +3,11 @@
 
 import argparse
 import os
+from multiprocessing import Pool, cpu_count
 from subprocess import Popen, PIPE
+from tempfile import NamedTemporaryFile
+
+from Bio import SeqIO
 
 
 def blastn(query, subject, conf):
@@ -21,13 +25,13 @@ def blastn(query, subject, conf):
         "-query", os.path.join(input_path, query),
         "-db", os.path.join(output_db, subject),
         "-outfmt", "6",
+        "-task", conf.get("blastn", "task"),
         "-evalue", conf.get("blastn", "evalue"),
         "-word_size", conf.get("blastn", "word"),
         "-penalty", conf.get("blastn", "penalty"),
         "-reward", conf.get("blastn", "reward"),
         "-gapopen", conf.get("blastn", "gapopen"),
         "-gapextend", conf.get("blastn", "gapextend")]
-
 
     return run_command(command)
 
@@ -65,11 +69,40 @@ def run_command(command):
     sub = Popen(command, stdout=PIPE, stderr=PIPE)
     stdout, stderr = sub.communicate()
 
-    return stdout, stderr
+    if stderr:
+        # TODO: Some programs throws common messages through stderr.
+        raise IOError(stderr)
+
+    return stdout
+
+
+def split_query(query_file, n=100):
+    """Return a generator of Tempfiles with n seqs each."""
+
+    pack = []
+    for record in SeqIO.parse(query_file, "fasta"):
+        pack.append(record)
+
+        if len(pack) == n:
+            # Enough sequences has been collected, pack and yield
+            new_fasta = NamedTemporaryFile(delete=False)
+
+            SeqIO.write(pack, new_fasta, "fasta")
+            new_fasta.seek(0)
+            pack = []
+
+            yield new_fasta
+
+    # Yield last pack
+    new_fasta = NamedTemporaryFile(delete=False)
+    SeqIO.write(pack, new_fasta, "fasta")
+    new_fasta.seek(0)
+
+    yield new_fasta
 
 
 if __name__ == "__main__":
-    from BEM import config
+    import config
 
     parser = argparse.ArgumentParser(description="Runs a blast.")
     parser.add_argument("--query", dest="query", required=True)
@@ -79,11 +112,23 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config_values = config.get_config_file(args.config)
+    config_values = config.get_config_file(args.config_file)
+
+    # Use all available CPUs
+    pool = Pool(cpu_count())
 
     if args.strategy == "blastn":
         format_db(args.subject, "nucl", config_values)
-        blastn(args.query, args.subject, config_values)
+        # Lower the nice value
+        os.nice(5)
+        # Unset the file_source
+        config_values.set("paths", "input_path", "")
+        for file_handler in split_query(args.query):
+            stdout = blastn(
+                file_handler.name, args.subject, config_values)
+            print stdout
+            # Delete the intermediary Tempfile
+            os.unlink(file_handler.name)
 
     elif args.strategy == "tblastn":
         format_db(args.subject, "prot", config_values)

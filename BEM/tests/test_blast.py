@@ -24,13 +24,12 @@ class testFormatDatabase(TestCase):
             os.rmdir(self.db_path)
 
     def test_formatn_database(self):
-        stdout, stderr = blast.format_db(self.fasta, "nucl", self.config)
-        self.assertEqual(stderr, "")
+        stdout = blast.format_db(self.fasta, "nucl", self.config)
         self.assertTrue(stdout.split("\n")[2].startswith(
             "Building a new DB, current time:"))
 
     def test_checkn_output(self):
-        _, _ = blast.format_db(self.fasta, "nucl", self.config)
+        blast.format_db(self.fasta, "nucl", self.config)
 
         expected_output = ["subject.fas.nhr",
                            "subject.fas.nin",
@@ -69,8 +68,7 @@ class testBlastN(TestCase):
         os.rmdir(blastout_path)
 
     def test_blastn(self):
-        stdout, stderr = blast.blastn(self.query, self.subject, self.config)
-        self.assertEqual(stderr, "")
+        stdout = blast.blastn(self.query, self.subject, self.config)
         self.assertEqual(
             stdout.split("\n")[0],
             "Mock_DNA_sequence\tDrosophila\t99.48\t382" +\
