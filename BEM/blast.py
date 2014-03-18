@@ -85,20 +85,23 @@ def split_query(query_file, n=100):
 
         if len(pack) == n:
             # Enough sequences has been collected, pack and yield
-            new_fasta = NamedTemporaryFile(delete=False)
-
-            SeqIO.write(pack, new_fasta, "fasta")
-            new_fasta.seek(0)
+            yield join_pack(pack)
             pack = []
 
-            yield new_fasta
+    # Yield last pack if any
+    if pack:
+        yield join_pack(pack)
 
-    # Yield last pack
+
+def join_pack(pack):
+    """Yield a pack of sequences."""
+
     new_fasta = NamedTemporaryFile(delete=False)
+
     SeqIO.write(pack, new_fasta, "fasta")
     new_fasta.seek(0)
 
-    yield new_fasta
+    return new_fasta
 
 
 if __name__ == "__main__":
@@ -124,9 +127,8 @@ if __name__ == "__main__":
         # Unset the file_source
         config_values.set("paths", "input_path", "")
         for file_handler in split_query(args.query):
-            stdout = blastn(
+            blastout = blastn(
                 file_handler.name, args.subject, config_values)
-            print stdout
             # Delete the intermediary Tempfile
             os.unlink(file_handler.name)
 
