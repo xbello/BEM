@@ -2,6 +2,8 @@
 import os
 from unittest import TestCase
 
+from Bio import SeqIO
+
 from BEM import blast
 from .test_mocks import Config
 
@@ -73,3 +75,12 @@ class testBlastN(TestCase):
             stdout.split("\n")[0],
             "Mock_DNA_sequence\tDrosophila\t99.48\t382" +\
             "\t0\t1\t1\t382\t67\t446\t2e-128\t 445")
+
+    def test_split_query(self):
+        subject = "tests/Small_Subject.fas"
+
+        for pack in blast.split_query(subject, n=10):
+            seqs_pack = list(SeqIO.parse(pack.name, "fasta"))
+            # Check all the files have 10 or less sequences
+            self.assertTrue(len(seqs_pack) <= 10)
+            os.unlink(pack.name)

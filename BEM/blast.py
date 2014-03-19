@@ -3,6 +3,7 @@
 
 import argparse
 import os
+from itertools import izip_longest
 from multiprocessing import Pool, cpu_count
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
@@ -77,28 +78,24 @@ def run_command(command):
 
 
 def split_query(query_file, n=100):
-    """Return a generator of Tempfiles with n seqs each."""
+    """Return a generator of Tempfiles with n seqs each.
 
-    pack = []
-    for record in SeqIO.parse(query_file, "fasta"):
-        pack.append(record)
+    Remember to unlink the pack-file returned, or may get an Exception.
 
-        if len(pack) == n:
-            # Enough sequences has been collected, pack and yield
-            yield join_pack(pack)
-            pack = []
+    """
 
-    # Yield last pack if any
-    if pack:
+    sequences_iter = [iter(SeqIO.parse(query_file, "fasta"))] * n
+
+    for pack in izip_longest(*sequences_iter):
         yield join_pack(pack)
 
 
 def join_pack(pack):
     """Yield a pack of sequences."""
-
     new_fasta = NamedTemporaryFile(delete=False)
 
-    SeqIO.write(pack, new_fasta, "fasta")
+    # The last pack comes filled with "None", thus check for its Trueness
+    SeqIO.write([p for p in pack if p], new_fasta, "fasta")
     new_fasta.seek(0)
 
     return new_fasta
