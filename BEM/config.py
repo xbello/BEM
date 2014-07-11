@@ -18,22 +18,26 @@ def read_config_values(config_file_path):
 
     config = ConfigParser.SafeConfigParser()
 
-    if os.path.isfile(config_file_path):
+    if config_file_path and os.path.isfile(config_file_path):
         config.readfp(open(config_file_path))
         return config
 
     return False
 
+
 def get_config_file(config_file_path):
     """Generate and return the apropriate config parsed ."""
 
-    fallbacks = [config_file_path,
-                 os.path.join(os.getcwd(), config_file_path),
-                 os.environ.get("BEM_CONFIG")]
+    fallbacks = []
+    if config_file_path:
+        fallbacks = [config_file_path,
+                     os.path.join(os.getcwd(), config_file_path)]
+
+    fallbacks.append(os.environ.get("BEM_CONFIG"))
 
     for step in fallbacks:
         config = read_config_values(step)
         if config:
             return config
 
-    raise IOError("Config not found in {0}.".format(config_file_path))
+    raise IOError("Config not found in {0}.".format(config_file_path or "-"))

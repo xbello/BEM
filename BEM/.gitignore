@@ -1,4 +1,5 @@
 *.pyc
+real_testing/
 tests/blast_output/
 tests/htmlcov/
 tests/.coverage

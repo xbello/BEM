@@ -1,48 +1,133 @@
+#!/usr/bin/env/ python
+"""Proxy for BLASTing sequences."""
+
 import argparse
-import ConfigParser
-from multiprocessing import Process, cpu_count
+import os
+from itertools import izip_longest
+from multiprocessing import Pool, cpu_count
+from subprocess import Popen, PIPE
+from tempfile import NamedTemporaryFile
 
-import utils
-
-config = ConfigParser.SafeConfigParser()
-config.read("config.cfg")
-output_path = config.get("paths", "output_db")
-
-
-def blast(query, subject, evalue, word, penalty, reward, gapopen, gapextend):
-    """This is a docstring"""
-    #TODO: Pass the num-threads to blastn program
-    CORES = cpu_count()
-    print CORES
-    p = Process(
-        target=utils.blastn, args=(
-            query, subject, evalue, word,
-            penalty, reward, gapopen, gapextend,))
-    p.start()
-    p.join()
+from Bio import SeqIO
 
 
-def format_db(subject, db_type):
-    utils.format_database(subject, db_type, config)
+def blastn(query, subject, conf):
+    """Launch a blastn."""
 
-    return True
+    binary = os.path.join(
+        conf.get("binaries", "blast"),
+        conf.get("binaries", "blastn"))
+
+    output_db = conf.get("paths", "output_db")
+    input_path = conf.get("paths", "input_path")
+
+    command = [
+        binary,
+        "-query", os.path.join(input_path, query),
+        "-db", os.path.join(output_db, subject),
+        "-outfmt", "6",
+        "-task", conf.get("blastn", "task"),
+        "-evalue", conf.get("blastn", "evalue"),
+        "-word_size", conf.get("blastn", "word"),
+        "-penalty", conf.get("blastn", "penalty"),
+        "-reward", conf.get("blastn", "reward"),
+        "-gapopen", conf.get("blastn", "gapopen"),
+        "-gapextend", conf.get("blastn", "gapextend")]
+
+    return run_command(command)
+
+
+def format_db(fasta_src, db_type, conf):
+    """Return the output after formating a database to use with NCBI BLAST.
+
+    db_type is ``nucl`` or ``prot``.
+
+    """
+
+    assert db_type in ["nucl", "prot"]
+
+    binary = conf.get("binaries", "makeblastdb")
+    binary_path = conf.get("binaries", "blast")
+    output_path = conf.get("paths", "output_db")
+
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path)
+
+    input_path = conf.get("paths", "input_path")
+
+    command = [
+        os.path.join(binary_path, binary),
+        "-in", os.path.join(input_path, fasta_src),
+        "-out", os.path.join(output_path, fasta_src),
+        "-dbtype", db_type]
+
+    return run_command(command)
+
+
+def run_command(command):
+    """Return the output of a command after running it under subprocess."""
+
+    sub = Popen(command, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = sub.communicate()
+
+    if stderr:
+        # TODO: Some programs throws common messages through stderr.
+        raise IOError(stderr)
+
+    return stdout
+
+
+def split_query(query_file, n=100):
+    """Return a generator of Tempfiles with n seqs each.
+
+    Remember to unlink the pack-file returned, or may get an Exception.
+
+    """
+
+    sequences_iter = [iter(SeqIO.parse(query_file, "fasta"))] * n
+
+    for pack in izip_longest(*sequences_iter):
+        yield join_pack(pack)
+
+
+def join_pack(pack):
+    """Yield a pack of sequences."""
+    new_fasta = NamedTemporaryFile(delete=False)
+
+    # The last pack comes filled with "None", thus check for its Trueness
+    SeqIO.write([p for p in pack if p], new_fasta, "fasta")
+    new_fasta.seek(0)
+
+    return new_fasta
+
 
 if __name__ == "__main__":
+    import config
+
     parser = argparse.ArgumentParser(description="Runs a blast.")
     parser.add_argument("--query", dest="query", required=True)
     parser.add_argument("--subject", dest="subject", required=True)
-    parser.add_argument("--dbtype", dest="dbtype", default="nucl")
-    parser.add_argument(
-        "--evalue", dest="evalue", default="5",
-        help="e-value expressed as the power of ten, being 5 = 10^-5")
-    parser.add_argument("--word", dest="word", default=11)
-    parser.add_argument("--penalty", dest="penalty", type=int, default=-5)
-    parser.add_argument("--reward", dest="reward", type=int, default=5)
-    parser.add_argument("--gapopen", dest="gapopen", type=int, default=10)
-    parser.add_argument("--gapextend", dest="gapextend", type=int, default=10)
+    parser.add_argument("--strategy", dest="strategy", default="blastn")
+    parser.add_argument("--config", dest="config_file")
 
     args = parser.parse_args()
 
-    format_db(args.subject, args.dbtype)
-    #blast(args.query, subject, args.evalue, args.penalty,
-    #    args.reward, args.gapopen, args.gapextend)
+    config_values = config.get_config_file(args.config_file)
+
+    # Use all available CPUs
+    pool = Pool(cpu_count())
+
+    if args.strategy == "blastn":
+        format_db(args.subject, "nucl", config_values)
+        # Lower the nice value
+        os.nice(5)
+        # Unset the file_source
+        config_values.set("paths", "input_path", "")
+        for file_handler in split_query(args.query):
+            blastout = blastn(
+                file_handler.name, args.subject, config_values)
+            # Delete the intermediary Tempfile
+            os.unlink(file_handler.name)
+
+    elif args.strategy == "tblastn":
+        format_db(args.subject, "prot", config_values)
