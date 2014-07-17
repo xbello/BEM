@@ -61,4 +61,3 @@ class TestConfig(TestCase):
 
         # Restate old environ, if any
         os.environ["BEM_CONFIG"] = old_environ or ""
-
