@@ -10,9 +10,20 @@ from tempfile import NamedTemporaryFile
 
 from Bio import SeqIO
 
+import parse
+
 
 def blastn(query, subject, conf):
-    """Launch a blastn."""
+    """Return a generator after launching a blastn against a compiled database.
+
+    The generator yields dicts from `parse.blast_tab`, like:
+
+        {'subject_end': '761', 'query_end': '1466', 'e_val': '0.26',
+         'query': 'BEL1-I_AG', 'identity': '78.95', 'subject': '3293e',
+         'subject_start': '798', 'query_start': '1429', 'length': '38',
+         'score': '35.9', 'n_match': '8'}
+
+    """
 
     binary = os.path.join(
         conf.get("binaries", "blast"),
@@ -24,7 +35,7 @@ def blastn(query, subject, conf):
     command = [
         binary,
         "-query", os.path.join(input_path, query),
-        "-db", os.path.join(output_db, subject),
+        "-db", os.path.join(input_path, output_db, subject),
         "-outfmt", "6",
         "-task", conf.get("blastn", "task"),
         "-evalue", conf.get("blastn", "evalue"),
@@ -34,7 +45,7 @@ def blastn(query, subject, conf):
         "-gapopen", conf.get("blastn", "gapopen"),
         "-gapextend", conf.get("blastn", "gapextend")]
 
-    return run_command(command)
+    return parse.blast_tab(run_command(command))
 
 
 def format_db(fasta_src, db_type, conf):

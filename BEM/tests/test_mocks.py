@@ -16,15 +16,14 @@ class Config(object):
                 "input_path": self.path,
                 "output_blast": os.path.join(self.path, "blast_output")},
             "blastn": {
-                "task": "megablast",
-                "evalue": "1E-5",
+                "task": "blastn",
+                "evalue": "1",
                 "word": "11",
-                "penalty": "-4",
+                "penalty": "-5",
                 "reward": "5",
                 "gapopen": "10",
-                "gapextend": "6"}
+                "gapextend": "10"}
         }
-
 
     def get(self, entry, key):
         return self.values[entry][key]
