@@ -41,3 +41,5 @@ class testBlastN(TestCase):
         files_tuple = tuple(group_files)
 
         self.assertEqual(len(files_tuple), 10)
+
+        self.assertIsInstance(files_tuple[0], _TemporaryFileWrapper)

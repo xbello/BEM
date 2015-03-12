@@ -5,7 +5,8 @@ from Bio import SeqIO
 
 def files(fasta_file, group_size):
     """Return a generator with files and each file with group_size Seqs."""
-    return group(fasta_file, group_size)
+    for seq_group in group(fasta_file, group_size):
+        yield save_bioseqs(seq_group)
 
 
 def group(fasta_file, group_size):
