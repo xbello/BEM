@@ -6,7 +6,7 @@ from unittest import TestCase
 from BEM import blast_group
 
 
-class testBlastN(TestCase):
+class testGrouping(TestCase):
     def setUp(self):
         self.path = os.path.dirname(__file__)
         self.GROUP_SIZE = 10
@@ -43,3 +43,4 @@ class testBlastN(TestCase):
         self.assertEqual(len(files_tuple), 10)
 
         self.assertIsInstance(files_tuple[0], _TemporaryFileWrapper)
+        self.assertEqual(len(files_tuple[0].readlines()), 30)
