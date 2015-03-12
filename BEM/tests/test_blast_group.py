@@ -34,3 +34,10 @@ class testBlastN(TestCase):
             self.assertEqual(
                 len([x for x in temp_fasta if x.startswith(">")]),
                 self.GROUP_SIZE)
+
+    def test_group_to_files(self):
+        group_files = blast_group.files(self.query, self.GROUP_SIZE)
+
+        files_tuple = tuple(group_files)
+
+        self.assertEqual(len(files_tuple), 10)

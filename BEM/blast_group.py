@@ -3,6 +3,11 @@ from tempfile import NamedTemporaryFile
 from Bio import SeqIO
 
 
+def files(fasta_file, group_size):
+    """Return a generator with files and each file with group_size Seqs."""
+    return group(fasta_file, group_size)
+
+
 def group(fasta_file, group_size):
     """Yield groups of Bio.Seqs from the fasta_gen of size group_size."""
 
