@@ -51,17 +51,13 @@ class testDeoverlap(TestCase):
         deoverlap.sort_by_score(self.unsorted_single_element)
         assert self.unsorted_single_element == self.single_element
 
-    def test_str_to_int(self):
-        """Test the transformation of str points of an element into ints
-        """
-        assert deoverlap.str_to_int(self.single_element[0]) == \
+    def test_int_vs_str(self):
+        """Test the mutual transformation from ints to str and viceversa."""
+        assert deoverlap.int_vs_str(self.single_element[0]) == \
             ["38.8", "81.25", "PegasusA", 210, 710, "+", "4e", 138, 638]
-
-    def test_int_to_str(self):
-        """Test the transformation of int points of an element into strs
-        """
-        assert ["38.8", "81.25", "PegasusA", 210, 710, "+", "4e", 138, 638] == \
-            deoverlap.str_to_int(self.single_element[0])
+        assert ["38.8", "81.25", "PegasusA", "210",
+                "710", "+", "4e", "138", "638"] == \
+            deoverlap.int_vs_str(self.single_element[0], to_str=True)
 
     def test_cut_element_by_other_head(self):
         """Test the cut of element if the head is overlapping"""

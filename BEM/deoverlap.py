@@ -62,8 +62,8 @@ def cut_element_by_other(cutter, to_cut):
     """
 
     # Transform the points into ints
-    to_cut = str_to_int(to_cut)
-    cutter = str_to_int(cutter)
+    to_cut = int_vs_str(to_cut)
+    cutter = int_vs_str(cutter)
 
     # First we save the element original length to readjust the score
     # further on
@@ -94,8 +94,8 @@ def cut_element_by_other(cutter, to_cut):
         to_cut[INIT_S_POINT] = to_cut[INIT_S_POINT] + lost_span
 
     to_cut = adjust_score(to_cut, element_length)
-    to_cut = int_to_str(to_cut)
-    cutter = int_to_str(cutter)
+    to_cut = int_vs_str(to_cut, to_str=True)
+    cutter = int_vs_str(cutter, to_str=True)
 
     return to_cut
 
@@ -239,24 +239,12 @@ def sort_by_score(list_of_elements):
     return True
 
 
-def int_to_str(element):
-    """Transform the int points of an element (INIT and END points of
-    both query and subject) into strings.
-    """
+def int_vs_str(element, to_str=False):
+    """Transform back and forth ints and strs of an element"""
+    f = str if to_str else int
 
     for p in [INIT_Q_POINT, END_Q_POINT, INIT_S_POINT, END_S_POINT]:
-        element[p] = str(element[p])
-
-    return element
-
-
-def str_to_int(element):
-    """Transform the int-erable points of an element (INIT and END points of
-    both query and subject) into int.
-    """
-
-    for p in [INIT_Q_POINT, END_Q_POINT, INIT_S_POINT, END_S_POINT]:
-        element[p] = int(element[p])
+        element[p] = f(element[p])
 
     return element
 
