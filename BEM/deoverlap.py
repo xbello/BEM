@@ -2,7 +2,16 @@
 import operator
 import sys
 
-from defs import *
+from defs import (DIR,
+                  END_Q_POINT,
+                  END_S_POINT,
+                  IDENTITY,
+                  INIT_Q_POINT,
+                  INIT_S_POINT,
+                  QUERY_NAME,
+                  SCORE,
+                  SUBJECT_NAME)
+
 
 """This script simply takes a sorted output and cut the elements if two
 sequences seems to be ocupying the same spot.
@@ -21,8 +30,7 @@ def adjust_score(element, old_length):
     if old_score > 0:
         score_per_base = old_score / old_length
 
-    new_length = abs(int(element[END_Q_POINT]) -
-                     int(element[INIT_Q_POINT]))
+    new_length = abs(element[END_Q_POINT] - element[INIT_Q_POINT])
 
     element[0] = "{0:.1f}".format(new_length * score_per_base)
 
@@ -61,9 +69,15 @@ def cut_element_by_other(cutter, to_cut):
     # further on
     element_length = abs(to_cut[END_Q_POINT] - to_cut[INIT_Q_POINT])
 
-    if to_cut[INIT_Q_POINT] < cutter[INIT_Q_POINT] and\
-       to_cut[END_Q_POINT] > cutter[INIT_Q_POINT] and\
-       to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
+    if to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
+            to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
+        # Element is embedded
+        # -> Delete it
+        return []
+
+    elif to_cut[INIT_Q_POINT] < cutter[INIT_Q_POINT] and\
+            to_cut[END_Q_POINT] > cutter[INIT_Q_POINT] and\
+            to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
         # Element start before reference, overlaps with it, ends before
         # -> Cut the tail
         lost_span = abs(cutter[INIT_Q_POINT] - to_cut[END_Q_POINT]) + 1
@@ -79,15 +93,9 @@ def cut_element_by_other(cutter, to_cut):
         to_cut[INIT_Q_POINT] = cutter[END_Q_POINT] + 1
         to_cut[INIT_S_POINT] = to_cut[INIT_S_POINT] + lost_span
 
-    elif to_cut[INIT_Q_POINT] > cutter[INIT_Q_POINT] and\
-            to_cut[END_Q_POINT] < cutter[END_Q_POINT]:
-        # Element is embedded
-        # -> Delete it
-        return []
-
+    to_cut = adjust_score(to_cut, element_length)
     to_cut = int_to_str(to_cut)
     cutter = int_to_str(cutter)
-    to_cut = adjust_score(to_cut, element_length)
 
     return to_cut
 
@@ -98,20 +106,20 @@ def cut_elements(list_of_lines, return_list=[]):
     Cut the element of least score by the element of higher score, returning
     the parts left of the elements.
     """
-    #TODO Should this be in config? Probably YES
+    # TODO Should this be in config? Probably YES
     MIN_LENGTH = 2
 
     sort_by_score(list_of_lines)
 
     if len(list_of_lines) == 1 and not return_list:
-        #If we got only one match, don't lose time
+        # If we got only one match, don't lose time
         return list_of_lines
 
     if len(list_of_lines) > 1:
         ref = list_of_lines.pop(0)
 
         if abs(int(ref[INIT_Q_POINT]) - int(ref[END_Q_POINT])) < MIN_LENGTH:
-            #Sequence is too short to be saved. Don't save and rerun
+            # Sequence is too short to be saved. Don't save and rerun
             cut_elements(list_of_lines, return_list=return_list)
         else:
             return_list.append(ref)
@@ -136,7 +144,7 @@ def clean_embedded(list_of_lines, return_list=[]):
 
         if int(list_of_lines[1][END_Q_POINT]) <=\
            int(list_of_lines[0][END_Q_POINT]):
-            #The after reference line is embedded in the reference, delete it
+            # The after reference line is embedded in the reference, delete it
             list_of_lines.pop(1)
         elif int(list_of_lines[0][INIT_Q_POINT]) ==\
                 int(list_of_lines[1][INIT_Q_POINT]):
@@ -146,7 +154,7 @@ def clean_embedded(list_of_lines, return_list=[]):
             # on the previous comparison).
             list_of_lines.pop(0)
         else:
-            #A new element needs to be worked
+            # A new element needs to be worked
             return_list.append(list_of_lines[0])
             list_of_lines.pop(0)
 
@@ -154,7 +162,7 @@ def clean_embedded(list_of_lines, return_list=[]):
         clean_embedded(list_of_lines, return_list)
 
     else:
-        #Only one element left in the pool, save it and return
+        # Only one element left in the pool, save it and return
         return_list.append(list_of_lines[0])
 
     return return_list
@@ -177,7 +185,7 @@ def load_input_file(i_file):
                 group = [this_line]
 
             else:
-                #We got at least one element catched. Now get all elements that
+                # We got at least one element catched. Now get all elements that
                 # can be related to it
                 if this_line[SUBJECT_NAME] == group[0][SUBJECT_NAME] and\
                    this_line[DIR] == group[0][DIR] and\
@@ -191,7 +199,7 @@ def load_input_file(i_file):
                         ret_list.append(out_line)
 
                     group = [this_line]  # And initialize it again
-    #And now the last group of the file
+    # And now the last group of the file
     non_embedded = clean_embedded(group, return_list=[])
     cutted_elements = cut_elements(non_embedded, return_list=[])
     for out_line in cutted_elements:
