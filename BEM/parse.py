@@ -16,7 +16,7 @@ def blast_tab(blast_output):
         yield {
             "query": data[0],
             "subject": data[1],
-            "identity": data[2],
+            "identity": round(float(data[2]), 2),
             "length": data[3],
             "n_match": data[4],
             "query_start": data[6],

@@ -1,4 +1,5 @@
 """Tests for parser."""
+import json
 import os
 from unittest import TestCase
 
@@ -11,8 +12,8 @@ class testParseBlastn(TestCase):
         self.blast_output = open(os.path.join(
             self.path, "Small_Blastn_Output.txt")).read()
 
-        self.HSP_output = eval(open(os.path.join(
-            self.path, "Small_Blastn_HSP.txt")).read())
+        with open(os.path.join(self.path, "Small_Blastn_HSP.json")) as j:
+            self.HSP_output = json.load(j)
 
     def test_blast_tab(self):
         parsed_dict = parse.blast_tab(self.blast_output)

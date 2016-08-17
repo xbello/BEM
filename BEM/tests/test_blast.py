@@ -1,4 +1,5 @@
 """Tests for the blast module."""
+import json
 import os
 from unittest import TestCase
 
@@ -13,9 +14,8 @@ class testBlastN(TestCase):
 
         self.subject = "Small_Subject.fas"
         self.query = "Small_Query.fas"
-        self.hsps = eval(open(
-            os.path.join(self.path,
-                         "Small_Blastn_HSP.txt")).read())
+        with open(os.path.join(self.path, "Small_Blastn_HSP.json")) as j:
+            self.hsps = json.load(j)
 
         blast.format_db(self.subject, "nucl", self.config)
 
@@ -40,5 +40,4 @@ class testBlastN(TestCase):
     def test_blastn(self):
         blast_hsps = blast.blastn(self.query, self.subject, self.config)
 
-        for blast_result in blast_hsps:
-            self.assertIn(blast_result, self.hsps)
+        self.assertItemsEqual(list(blast_hsps), self.hsps)
